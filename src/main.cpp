@@ -29,10 +29,10 @@ motor_group rightDrive = motor_group(backRight, midRight, frontRight);
 
 motor_group intake = motor_group(intake_1, intake_2, intake_3);
 
-int auton = 4;
+int auton = 1;
 
 #define cs Controller1.Screen
-#define Button Controller1.Button
+#define Button Controller1.Button  
 
 struct Values 
 {
@@ -54,7 +54,13 @@ Values universalPID(float target, float current, float kp, float ki, float kd, f
   return {control, err, integral};
 }
 
+float mid(float f1, float f2, float f3) {
 
+  return (f1 > f2 && f1 < f3) || (f1 < f2 && f1 > f3) ? f1 :
+         (f2 > f1 && f2 < f3) || (f2 < f1 && f1 > f3) ? f2 :
+         f3;
+
+}
 void pre_auton(void) {
 
   while (1) {
@@ -69,19 +75,19 @@ void pre_auton(void) {
 
     switch (auton) {
       case 1 :
-        cs.print("longTube");
-        break;
-      case 2 :
-        cs.print("middleTop");
-        break;
-      case 3 :
-        cs.print("middleBottom");
-        break;
-      case 4 :
         cs.print("SOLOAWP");
         break;
+      case 2 :
+        cs.print("RIGHT9");
+        break;
+      case 3 :
+        cs.print("LEFT9");
+        break;
+      case 4 :
+        cs.print("RIGHT4-3");
+        break;
       case 5 :
-        cs.print("4BALL");
+        cs.print("LEFT4-4");
         break;
       case 6 :
         cs.print("SKILLS");
@@ -195,7 +201,7 @@ void setVel(int vel) {
 }
 
 
-void go(float dir, float dist, int speed, float turnSpeed = 20, float turnRad = 0) {
+void go(float dir, float dist, int speed, float turnSpeed = 1, float turnRad = 0) {
   leftDrive.setVelocity(0, percent);
   rightDrive.setVelocity(0, percent);
   leftDrive.spin(forward);
@@ -226,8 +232,8 @@ void go(float dir, float dist, int speed, float turnSpeed = 20, float turnRad = 
         if (fabs(motorPower) < 1) motorPower = 1;
 
         
-        float leftPower  = - motorPower;
-        float rightPower = motorPower;
+        float leftPower  = - turnSpeed * motorPower;
+        float rightPower = turnSpeed * motorPower;
 
         leftDrive.setVelocity(leftPower, percent);
         rightDrive.setVelocity(rightPower, percent);
@@ -306,7 +312,7 @@ void take() {
 }
 
 void outake() {
-  intake.setVelocity(-100, percent);
+  intake.setVelocity(-95, percent);
   intake.spin(forward);
 }
 
@@ -320,13 +326,43 @@ void autonomous(void) {
 
   switch (auton) {
     case 1 :
-      go(0, 25.5, 65);
+
+
+      gate();
+      go(0, 26.25, 60);
+      go(90, 0, 0);
+      lick();
+      take();
       wait(100, msec);
-      go(-90, 2, 50);
-      hawk(2.5);
-      go(-90, -27, 60);
+      go(90, 8, 20);
+      wait(425, msec);
+      go(90, -19, 65);
       wait(100, msec);
-      hawk(1);
+      go(90, -4.5, 15);
+      gate();
+      wait(100, msec);
+      go(90, 1, 10);
+      go(90, -0.5, 10);
+      wait(1.1, sec);
+      untake();
+      lick();
+      go(90, 16.5, 40);
+      take();
+      gate();
+      go(225, 49.5, 70);
+      wait(100, msec);
+      untake();
+      outake();
+      wait(0.75, sec);
+      go(227, -10, 50);
+      take();
+      wait(250, msec);
+      go(180, 36, 80);
+      lick();
+      go(144, -16, 60, 2);
+      intake_3.setVelocity(-80, percent);
+      wait(100, msec);
+      gate();
       break;
 
     case 2 :
