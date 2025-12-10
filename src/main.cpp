@@ -29,7 +29,7 @@ motor_group rightDrive = motor_group(backRight, midRight, frontRight);
 
 motor_group intake = motor_group(intake_1, intake_2, intake_3);
 
-int auton = 1;
+int auton = 1 ;
 
 #define cs Controller1.Screen
 #define Button Controller1.Button  
@@ -61,6 +61,21 @@ float mid(float f1, float f2, float f3) {
          f3;
 
 }
+
+
+float low(float f1, float f2) {
+
+  return f1 < f2 ? f1 : f2;
+
+}
+
+float high(float f1, float f2) {
+
+  return f1 > f2 ? f1 : f2;
+
+}
+
+
 void pre_auton(void) {
 
   while (1) {
@@ -201,6 +216,79 @@ void setVel(int vel) {
 }
 
 
+
+void arcRight(float dir, float turnRad = 0) {
+  float error = dir - gyro;
+  float base  = error * turnGain;
+
+  leftDrive.spin(forward);
+  rightDrive.spin(forward);
+
+  while (abs(error) > 1) {
+
+  error = dir - gyro;
+  base  = error * turnGain;
+
+
+  base = low(base, 30);
+
+  float leftPower = base * ((turnRad + (driveWidth/2)) / turnRad);
+  float rightPower = base * ((turnRad - (driveWidth/2)) / turnRad);
+
+
+  leftDrive.setVelocity(leftPower, percent);
+  rightDrive.setVelocity(rightPower, percent);
+
+  }
+
+  leftDrive.setStopping(brake);
+  rightDrive.setStopping(brake);
+
+  
+  leftDrive.setVelocity(0, percent);
+  rightDrive.setVelocity(0, percent);
+
+
+}
+
+
+void arcLeft(float dir, float turnRad = 0) {
+  float error = dir - gyro;
+  float base  = error * turnGain;
+
+  leftDrive.spin(forward);
+  rightDrive.spin(forward);
+
+  while (abs(error) > 1) {
+
+  error = dir - gyro;
+  base  = error * turnGain;
+
+  base = high(base, -30);
+
+  float rightPower = base * ((turnRad + (driveWidth/2)) / turnRad);
+  float leftPower = base * ((turnRad - (driveWidth/2)) / turnRad);
+
+
+  leftDrive.setVelocity(leftPower, percent);
+  rightDrive.setVelocity(rightPower, percent);
+
+  }
+
+  leftDrive.setStopping(brake);
+  rightDrive.setStopping(brake);
+
+  
+  leftDrive.setVelocity(0, percent);
+  rightDrive.setVelocity(0, percent);
+
+
+}
+
+
+
+
+
 void go(float dir, float dist, int speed, float turnSpeed = 1, float turnRad = 0) {
   leftDrive.setVelocity(0, percent);
   rightDrive.setVelocity(0, percent);
@@ -329,69 +417,45 @@ void autonomous(void) {
 
 
       gate();
-      go(0, 26.25, 60);
-      go(90, 0, 0);
-      lick();
-      take();
-      wait(100, msec);
-      go(90, 8, 20);
-      wait(425, msec);
-      go(90, -19, 65);
-      wait(100, msec);
-      go(90, -4.5, 15);
-      gate();
-      wait(100, msec);
-      go(90, 1, 10);
-      go(90, -0.5, 10);
-      wait(1.1, sec);
-      untake();
-      lick();
-      go(90, 16.5, 40);
-      take();
-      gate();
-      go(225, 49.5, 70);
-      wait(100, msec);
-      untake();
-      outake();
-      wait(0.75, sec);
-      go(227, -10, 50);
-      take();
-      wait(250, msec);
-      go(180, 36, 80);
-      lick();
-      go(144, -16, 60, 2);
-      intake_3.setVelocity(-80, percent);
-      wait(100, msec);
-      gate();
-      break;
-
-    case 2 :
-      gate();
       go(0, 26.5, 60);
       go(90, 0, 0);
       lick();
       take();
-      wait(300, msec);
-      go(90, 8, 20);
-      wait(450, msec);
-      go(90, -19, 65);
       wait(100, msec);
-      go(90, -5, 15);
+      go(90, 8, 20);
+      wait(440, msec);
+      go(90, -19.5, 65);
+      wait(100, msec);
+      go(90, -3,5, 15);
       gate();
       wait(100, msec);
-      go(90, 0.75, 10);
-      wait(1, sec);
+      go(90, -1, 10);
+      wait(1.1, sec);
       untake();
       lick();
-      go(90, 15.5, 40);
+      go(90, 6, 40);
       take();
       gate();
-      go(225, 35, 70);
-      lick();
-      go(45, -17, 30);
-      wait(100, msec);
-      untake();
-      outake();
+      go(207, 26, 60);
+      go(230, 20, 40); 
+      // untake();
+      // outake();
+      // wait(0.75, sec);
+      // go(227, -7.5, 50);
+      // take();
+      // wait(250, msec);
+      // go(180, 43, 75);
+      // lick();
+      // wait(50,msec);
+      // go(136, -15, 60);
+      // intake_3.setVelocity(-80, percent);
+      // wait(100, msec);
+      // gate();
+      break;
+
+    case 2 :
+
+    arcRight(90, 10);
       
     break;
     case 3 :
@@ -481,25 +545,76 @@ void autonomous(void) {
       go(90, 0, 0);
       lick();
       take();
-      wait(300, msec);
-      go(90, 8.5, 20);
-      wait(650, msec);
-      go(90, -19, 65);
       wait(100, msec);
-      go(90, -4.5, 15);
+      go(90, 8, 20);
+      wait(650, msec);
+      go(90, -10, 65);
+      go(135, -10, 30);
+      go(90, -50, 50);
+      go(45, -10, 30);
+      go(-90, -10, 30);
+      wait(100, msec);
+      go(-90, -3,5, 15);
       gate();
       wait(100, msec);
-      go(90, 1, 10);
-      go(90, -0.5, 10);
-      lick();
-      wait(2, sec);
+      go(-90, -1, 10);
+      wait(1.1, sec);
       untake();
-      go(90, 16, 40);
-      go(135, 30, 40);
-      go(175, 0, 0);
-      wait(250, msec);
+      go(-90, 25, 40);
+      wait(650, msec);
+      go(-90, -22, 30);
+      wait(100, msec);
+      go(-90, -3,5, 15);
+      gate();
+      wait(100, msec);
+      go(-90, -1, 10);
+      wait(1.1, sec);
+      untake();
+      lick();
+      go(-90, 10, 40);
+      go(-180, 80, 60);
+      lick();
+      go(-90, 15, 40);
+      wait(650, msec);
+      go(-90, -10, 30);
+      wait(100, msec);
+      go(-45, -10, 30);
+      go(-90, 50, 40);
+      go(-135, -10, 30);
+      go(-270, -8, 30);
+      wait(100, msec);
+      go(-270, -3,5, 15);
+      gate();
+      wait(100, msec);
+      go(-270, -1, 10);
+      wait(1.1, sec);
+      untake();
+      go(-270, 25, 40);
+      wait(650, msec);
+      go(-270, -22, 30);
+      wait(100, msec);
+      go(-270, -3,5, 15);
+      gate();
+      wait(100, msec);
+      go(-270, -1, 10);
+      wait(1.1, sec);
+      untake();
+      lick();
+      go(-270, 10, 30);
+      go(-315, 20, 35);
+      go(-360, 0, 0);
+      lick();
+      wait(100, msec);
       take();
-      go(170, 35, 100);
+      go(-360, 30, 30);
+
+
+
+
+
+
+
+
 
 
       break;
