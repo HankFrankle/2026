@@ -230,7 +230,7 @@ void arcRight(float dir, float turnRad, float speed = 100) {
   base  = error * turnGain;
 
 
-  base = low(base, 50);
+  base = mid(base, 50, 5);
 
   float leftPower = base * ((turnRad + (driveWidth/2)) / turnRad);
   float rightPower = base * ((turnRad - (driveWidth/2)) / turnRad);
@@ -264,7 +264,7 @@ void arcLeft(float dir, float turnRad, float speed = 100) {
   error = dir - gyro;
   base  = error * turnGain;
 
-  base = high(base, -50);
+  base = mid(base, -50, -5);
 
   float rightPower = base * ((turnRad + (driveWidth/2)) / turnRad);
   float leftPower = base * ((turnRad - (driveWidth/2)) / turnRad);
@@ -454,7 +454,8 @@ void autonomous(void) {
 
     case 2 :
 
-    arcRight(90, 15, 1000);
+    take();
+    arcRight(45, 40);
       
     break;
     case 3 :
