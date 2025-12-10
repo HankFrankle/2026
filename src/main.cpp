@@ -29,7 +29,7 @@ motor_group rightDrive = motor_group(backRight, midRight, frontRight);
 
 motor_group intake = motor_group(intake_1, intake_2, intake_3);
 
-int auton = 1 ;
+int auton = 2;
 
 #define cs Controller1.Screen
 #define Button Controller1.Button  
@@ -217,9 +217,9 @@ void setVel(int vel) {
 
 
 
-void arcRight(float dir, float turnRad = 0) {
+void arcRight(float dir, float turnRad, float speed = 100) {
   float error = dir - gyro;
-  float base  = error * turnGain;
+  float base  = (speed / 100) * error * turnGain;
 
   leftDrive.spin(forward);
   rightDrive.spin(forward);
@@ -230,7 +230,7 @@ void arcRight(float dir, float turnRad = 0) {
   base  = error * turnGain;
 
 
-  base = low(base, 30);
+  base = low(base, 50);
 
   float leftPower = base * ((turnRad + (driveWidth/2)) / turnRad);
   float rightPower = base * ((turnRad - (driveWidth/2)) / turnRad);
@@ -252,9 +252,9 @@ void arcRight(float dir, float turnRad = 0) {
 }
 
 
-void arcLeft(float dir, float turnRad = 0) {
+void arcLeft(float dir, float turnRad, float speed = 100) {
   float error = dir - gyro;
-  float base  = error * turnGain;
+  float base  = (speed / 100 ) * error * turnGain;
 
   leftDrive.spin(forward);
   rightDrive.spin(forward);
@@ -264,7 +264,7 @@ void arcLeft(float dir, float turnRad = 0) {
   error = dir - gyro;
   base  = error * turnGain;
 
-  base = high(base, -30);
+  base = high(base, -50);
 
   float rightPower = base * ((turnRad + (driveWidth/2)) / turnRad);
   float leftPower = base * ((turnRad - (driveWidth/2)) / turnRad);
@@ -436,8 +436,7 @@ void autonomous(void) {
       go(90, 6, 40);
       take();
       gate();
-      go(207, 26, 60);
-      go(230, 20, 40); 
+      arcRight(229, 100);
       // untake();
       // outake();
       // wait(0.75, sec);
@@ -455,7 +454,7 @@ void autonomous(void) {
 
     case 2 :
 
-    arcRight(90, 10);
+    arcRight(90, 15, 1000);
       
     break;
     case 3 :
