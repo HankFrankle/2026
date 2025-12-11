@@ -29,7 +29,7 @@ motor_group rightDrive = motor_group(backRight, midRight, frontRight);
 
 motor_group intake = motor_group(intake_1, intake_2, intake_3);
 
-int auton = 2;
+int auton = 1;
 
 #define cs Controller1.Screen
 #define Button Controller1.Button  
@@ -230,7 +230,7 @@ void arcRight(float dir, float turnRad, float speed = 100) {
   base  = error * turnGain;
 
 
-  base = mid(base, 50, 5);
+  base = mid(base, 50, 15);
 
   float leftPower = base * ((turnRad + (driveWidth/2)) / turnRad);
   float rightPower = base * ((turnRad - (driveWidth/2)) / turnRad);
@@ -264,7 +264,7 @@ void arcLeft(float dir, float turnRad, float speed = 100) {
   error = dir - gyro;
   base  = error * turnGain;
 
-  base = mid(base, -50, -5);
+  base = mid(base, -50, -15);
 
   float rightPower = base * ((turnRad + (driveWidth/2)) / turnRad);
   float leftPower = base * ((turnRad - (driveWidth/2)) / turnRad);
@@ -423,9 +423,9 @@ void autonomous(void) {
       take();
       wait(100, msec);
       go(90, 8, 20);
-      wait(440, msec);
+      wait(430, msec);
       go(90, -19.5, 65);
-      wait(100, msec);
+      wait(150, msec);
       go(90, -3,5, 15);
       gate();
       wait(100, msec);
@@ -433,23 +433,23 @@ void autonomous(void) {
       wait(1.1, sec);
       untake();
       lick();
-      go(90, 6, 40);
-      take();
       gate();
-      arcRight(229, 100);
-      // untake();
-      // outake();
-      // wait(0.75, sec);
-      // go(227, -7.5, 50);
-      // take();
-      // wait(250, msec);
-      // go(180, 43, 75);
-      // lick();
-      // wait(50,msec);
-      // go(136, -15, 60);
-      // intake_3.setVelocity(-80, percent);
-      // wait(100, msec);
-      // gate();
+      arcRight(228, 8);
+      take();
+      go(225, 31, 40);
+      outake();
+      wait(1, sec);
+      untake();
+      go(226, -7.5, 50);
+      take();
+      wait(100, msec);
+      go(180, 40, 60);
+      lick();
+      wait(50,msec);
+      go(134, -15, 60);
+      intake_3.setVelocity(-80, percent);
+      wait(100, msec);
+      gate();
       break;
 
     case 2 :
