@@ -29,7 +29,7 @@ motor_group rightDrive = motor_group(backRight, midRight, frontRight);
 
 motor_group intake = motor_group(intake_1, intake_2, intake_3);
 
-int auton = 1;
+int auton = 2;
 
 #define cs Controller1.Screen
 #define Button Controller1.Button  
@@ -230,7 +230,7 @@ void arcRight(float dir, float turnRad, float speed = 100) {
   base  = error * turnGain;
 
 
-  base = mid(base, 50, 15);
+  base = mid(base, 50, (turnRad / 5) *15);
 
   float leftPower = base * ((turnRad + (driveWidth/2)) / turnRad);
   float rightPower = base * ((turnRad - (driveWidth/2)) / turnRad);
@@ -264,7 +264,7 @@ void arcLeft(float dir, float turnRad, float speed = 100) {
   error = dir - gyro;
   base  = error * turnGain;
 
-  base = mid(base, -50, -15);
+  base = mid(base, -50, (turnRad / 5) * -15);
 
   float rightPower = base * ((turnRad + (driveWidth/2)) / turnRad);
   float leftPower = base * ((turnRad - (driveWidth/2)) / turnRad);
@@ -455,36 +455,26 @@ void autonomous(void) {
     case 2 :
 
     take();
-    arcRight(45, 40);
+    gate();
+    go(0, 13, 40);
+    arcRight(140, 13);
+    go(140, 17, 40);
+    go(180, -6, 60);
+    wait(150, msec);
+    go(180, -3,5, 15);
+    gate();
+    wait(100, msec);
+    go(180, -1, 10);
+    wait(1.1, sec);
+    untake();
+
       
     break;
     case 3 :
-      gate();
-      go(0, 26.5, 60);
-      go(90, 0, 0);
-      lick();
-      take();
-      wait(300, msec);
-      go(90, 8, 20);
-      wait(450, msec);
-      go(90, -19, 65);
-      wait(100, msec);
-      go(90, -4.5, 15);
-      gate();
-      wait(100, msec);
-      go(90, 1, 10);
-      go(90, -0.5, 10);
-      wait(1.1, sec);
-      untake();
-      lick();
-      go(90, 16, 40);
-      take();
-      gate();
-      go(225, 31, 70);
-      go(227, 20, 30);
-      wait(100, msec);
-      untake();
-      outake();
+
+    go(0, 5, 30);
+    arcLeft(-135, 8);
+
       break;
 
     case 4 :
