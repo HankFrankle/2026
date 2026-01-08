@@ -29,7 +29,7 @@ motor_group rightDrive = motor_group(backRight, midRight, frontRight);
 
 motor_group intake = motor_group(intake_1, intake_2, intake_3);
 
-int auton = 2;
+int auton = 1;
 
 #define cs Controller1.Screen
 #define Button Controller1.Button  
@@ -415,7 +415,7 @@ void autonomous(void) {
   switch (auton) {
     case 1 :
 
-
+    
       gate();
       go(0, 26.5, 60);
       go(90, 0, 0);
@@ -423,10 +423,10 @@ void autonomous(void) {
       take();
       wait(100, msec);
       go(90, 8, 20);
-      wait(430, msec);
+      wait(400, msec);
       go(90, -19.5, 65);
       wait(150, msec);
-      go(90, -3,5, 15);
+      go(90, -2.5, 10);
       gate();
       wait(100, msec);
       go(90, -1, 10);
@@ -436,20 +436,21 @@ void autonomous(void) {
       gate();
       arcRight(228, 8);
       take();
-      go(225, 31, 40);
+      go(225, 30, 40);
       outake();
       wait(1, sec);
       untake();
       go(226, -7.5, 50);
       take();
       wait(100, msec);
-      go(180, 40, 60);
+      go(180, 41, 60);
       lick();
       wait(50,msec);
-      go(134, -15, 60);
+      go(136, -14, 60);
       intake_3.setVelocity(-80, percent);
       wait(100, msec);
       gate();
+      
       break;
 
     case 2 :
@@ -459,74 +460,120 @@ void autonomous(void) {
     go(0, 13, 40);
     arcRight(140, 13);
     go(140, 17, 40);
-    go(180, -6, 60);
+    go(180, -4, 60);
     wait(150, msec);
-    go(180, -3,5, 15);
+    go(180, -2, 15);
     gate();
     wait(100, msec);
     go(180, -1, 10);
     wait(1.1, sec);
     untake();
+    lick();
+    take();
+    gate();
+    go(180, 18, 70);
+    wait(50, msec);
+    go(180, 5, 30);
+    wait(475, msec);
+    go(181, -19.5, 45);
+    wait(150, msec);
+    go(181, -2.5, 15);
+    gate(); 
+    wait(100, msec);
+    go(181, -1.1, 10);
+    wait(1, sec);
+    untake();
+    lick();
+    gate();
+
+
+
+    // go(180, 8, 60);
+    // go(220, -8, 70);
+    // go(165, -5, 30);
+    // gate();
+    // go(165, -15, 30);
 
       
     break;
     case 3 :
 
-    go(0, 5, 30);
-    arcLeft(-135, 8);
+
+    take();
+    gate();
+    go(0, 13, 40);
+    arcRight(140, 13);
+    go(-140, 17, 40);
+    go(-180, -4, 60);
+    wait(150, msec);
+    go(180, -2, 15);
+    gate();
+    wait(100, msec);
+    go(-180, -1, 10);
+    wait(1.1, sec);
+    untake();
+    lick();
+    take();
+    gate();
+    go(-180, 18, 70);
+    wait(50, msec);
+    go(-180, 5, 30);
+    wait(475, msec);
+    go(-181, -19.5, 45);
+    wait(150, msec);
+    go(-181, -2.5, 15);
+    gate(); 
+    wait(100, msec);
+    go(-181, -1.1, 10);
+    wait(1, sec);
+    untake();
+    lick();
+    gate();
 
       break;
 
     case 4 :
+      
       gate();
       go(0, 26.5, 60);
-      go(90, 0, 0);
+      go(-90, 0, 0);
       lick();
       take();
-      wait(300, msec);
-      go(90, 8.5, 20);
-      wait(450, msec);
-      go(90, -19, 65);
       wait(100, msec);
-      go(90, -4.5, 15);
+      go(-90, 8, 20);
+      wait(430, msec);
+      go(-90, -19.5, 65);
+      wait(150, msec);
+      go(-90, -3,5, 15);
       gate();
       wait(100, msec);
-      go(90, 1, 10);
-      go(90, -0.5, 10);
-      lick();
+      go(-90, -1, 10);
       wait(1.1, sec);
       untake();
-      go(90, 16, 40);
-      take();
+      lick();
       gate();
-      go(226, 31, 70);
-      go(226, 20, 30);
-      wait(100, msec);
+      arcRight(228, 8);
+      take();
+      go(-225, 20, 40);
+      wait(150, msec);
+      go(-45, -7.5, 30);
+      intake_3.setVelocity(-100, percent);
+      wait(1, sec);
       untake();
-      outake();
-      wait(4, sec);
-      gate();
+      go(-45, 7.5, 50);
       take();
-
-
-      // go(227, -13, 50);
-      // take();
-      // wait(250, msec);
-      // go(180, 42, 80);
-      // lick();
-      // go(140, -15, 60);
-      // intake_3.setVelocity(-100, percent);
-      // gate();
+      wait(100, msec);
+      go(0, 40, 60);
+      lick();
+      wait(50,msec);
+      go(46, 15, 60);
+      wait(100, msec);
+      outake();
       
     break;
     case 5 :
       gate();
-      take();
-      go(0, 26, 40);
-      wait(250, msec);
-      go(-125, -20, 30);
-      intake_3.setVelocity(-100, percent);
-      gate();
+    
       break;
 
     case 6 :
@@ -598,12 +645,33 @@ void autonomous(void) {
       take();
       go(-360, 30, 30);
 
+      break;
+        case 7 :
 
 
-
-
-
-
+      gate();
+      go(0, 26, 60);
+      go(90, 0, 0);
+      lick();
+      take();
+      wait(100, msec);
+      go(90, 8, 20);
+      wait(1000, msec);
+      go(90, -19.5, 65);
+      wait(150, msec);
+      go(90, -2.5, 10);
+      gate();
+      wait(100, msec);
+      go(90, -1, 10);
+      wait(3, sec);
+      outake();
+      wait(500, msec);
+      take();
+      wait(3, sec);
+      go(90, 10, 40);
+      go(145, 30, 40);
+      take();
+      go(180, 30, 50);
 
 
 
