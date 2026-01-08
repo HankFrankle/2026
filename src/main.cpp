@@ -440,10 +440,10 @@ void autonomous(void) {
       outake();
       wait(1, sec);
       untake();
-      go(226, -7.5, 50);
+      go(226, -8, 50);
       take();
       wait(100, msec);
-      go(180, 41, 60);
+      go(180.5, 41, 60);
       lick();
       wait(50,msec);
       go(136, -14, 60);
