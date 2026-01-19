@@ -6,28 +6,26 @@ brain Brain;
 competition Competition;
 
 controller Controller1 = controller(primary);
-motor intake_1 = motor(PORT2, ratio6_1, true);
-motor intake_2 = motor(PORT12, ratio18_1, true);
-motor intake_3 = motor(PORT1, ratio18_1, true);
+motor intake_1 = motor(PORT17, ratio6_1);
+motor intake_2 = motor(PORT20, ratio6_1, true);
 
-inertial Gyro1 = inertial(PORT13);
-digital_out descoreLeft = digital_out(Brain.ThreeWirePort.A);
-digital_out descoreRight = digital_out(Brain.ThreeWirePort.C);
-
-digital_out tongue = digital_out(Brain.ThreeWirePort.H);
+inertial Gyro1 = inertial(PORT1);
+digital_out dih = digital_out(Brain.ThreeWirePort.C);
+digital_out foreskin = digital_out(Brain.ThreeWirePort.B);
+digital_out tongue = digital_out(Brain.ThreeWirePort.A);
 
 
-motor backLeft = motor(PORT18, ratio6_1, true);
-motor midLeft = motor(PORT17, ratio6_1, true);
-motor frontRight = motor(PORT15, ratio6_1);
-motor backRight = motor(PORT20, ratio6_1);
-motor midRight = motor(PORT19, ratio6_1);
-motor frontLeft = motor(PORT16, ratio6_1, true); 
+motor frontLeft = motor(PORT14, ratio6_1); 
+motor midLeft = motor(PORT13, ratio6_1, true);
+motor backLeft = motor(PORT12, ratio6_1, true);
+motor frontRight = motor(PORT16, ratio6_1, true);
+motor midRight = motor(PORT15, ratio6_1);
+motor backRight = motor(PORT11, ratio6_1);
 
 motor_group leftDrive = motor_group(backLeft, midLeft, frontLeft);
 motor_group rightDrive = motor_group(backRight, midRight, frontRight);
 
-motor_group intake = motor_group(intake_1, intake_2, intake_3);
+motor_group intake = motor_group(intake_1, intake_2);
 
 int auton = 1;
 
@@ -109,6 +107,12 @@ void pre_auton(void) {
         break;
     
       }
+
+    if (Controller1.ButtonY.pressing()) {
+      return;
+    }
+
+    wait(20, msec);
   }
 }
 
@@ -183,7 +187,7 @@ void PIDturn(int target) {
 #define gyro (int)(round(Gyro1.rotation(degrees)))
 #define posn ((rightDrive.position(degrees) + leftDrive.position(degrees)) / 2) 
 #define driveGain ((float)0.55)
-#define turnGain ((float)0.415)
+#define turnGain ((float)0.4)
 #define angleError (-(dir - gyro))
 
 #define LP ( Kd * (turnRad + (driveWidth / 2)) / driveWidth)
@@ -264,7 +268,7 @@ void arcLeft(float dir, float turnRad, float speed = 100) {
   error = dir - gyro;
   base  = error * turnGain;
 
-  base = mid(base, -50, (turnRad / 5) * -15);
+  base = mid(base, 50, (turnRad / 5) * 15);
 
   float rightPower = base * ((turnRad + (driveWidth/2)) / turnRad);
   float leftPower = base * ((turnRad - (driveWidth/2)) / turnRad);
@@ -384,9 +388,8 @@ bool gateState = 0;
 bool tongueState = 0;
 
 void gate(void) {
-  gateState = !gateState;
-  descoreLeft.set(gateState);
-  descoreRight.set(gateState);
+  // gateState = !gateState;
+  //dih.set(gateState);
 }
 
 void lick(void) {
@@ -399,8 +402,8 @@ void take() {
   intake.spin(forward);
 }
 
-void outake() {
-  intake.setVelocity(-95, percent);
+void outake(float sped = 95) {
+  intake.setVelocity(-sped, percent);
   intake.spin(forward);
 }
 
@@ -415,76 +418,90 @@ void autonomous(void) {
   switch (auton) {
     case 1 :
 
-    
-      gate();
-      go(0, 26.5, 60);
+
       go(90, 0, 0);
-      lick();
-      take();
-      wait(100, msec);
-      go(90, 8, 20);
-      wait(400, msec);
-      go(90, -19.5, 65);
-      wait(150, msec);
-      go(90, -2.5, 10);
-      gate();
-      wait(100, msec);
-      go(90, -1, 10);
-      wait(1.1, sec);
-      untake();
-      lick();
-      gate();
-      arcRight(228, 8);
-      take();
-      go(225, 30, 40);
-      outake();
-      wait(1, sec);
-      untake();
-      go(226, -8, 50);
-      take();
-      wait(100, msec);
-      go(180.5, 41, 60);
-      lick();
-      wait(50,msec);
-      go(136, -14, 60);
-      intake_3.setVelocity(-80, percent);
-      wait(100, msec);
-      gate();
+
+
+      // gate();
+      // go(0, 26.5, 60);
+      // go(90, 0, 0);
+      // lick();
+      // take();
+      // wait(100, msec);
+      // go(90, 8, 20);
+      // wait(400, msec);
+      // go(90, -19.5, 65);
+      // wait(150, msec);
+      // go(90, -2.5, 10);
+      // gate();
+      // wait(100, msec);
+      // go(90, -1, 10);
+      // wait(1.1, sec);
+      // untake();
+      // lick();
+      // gate();
+      // arcRight(228, 8);
+      // take();
+      // go(225, 29, 40);
+      // outake();
+      // wait(1, sec);
+      // untake();
+      // go(226, -8, 50);
+      // take();
+      // wait(100, msec);
+      // go(180.5, 41, 60);
+      // lick();
+      // wait(50,msec);
+      // go(136, -14, 60);
+      // wait(100, msec);
+      // gate();
       
       break;
 
     case 2 :
 
-    take();
+
+
+        
     gate();
+    take();
     go(0, 13, 40);
-    arcRight(140, 13);
-    go(140, 17, 40);
-    go(180, -4, 60);
-    wait(150, msec);
-    go(180, -2, 15);
-    gate();
-    wait(100, msec);
-    go(180, -1, 10);
-    wait(1.1, sec);
-    untake();
-    lick();
-    take();
-    gate();
-    go(180, 18, 70);
-    wait(50, msec);
-    go(180, 5, 30);
-    wait(475, msec);
-    go(181, -19.5, 45);
-    wait(150, msec);
-    go(181, -2.5, 15);
+    arcLeft(-140, 13);
+    go(-140, -20, 40);
+    go(-140, 1, 20);
+
     gate(); 
-    wait(100, msec);
-    go(181, -1.1, 10);
-    wait(1, sec);
-    untake();
-    lick();
-    gate();
+
+    // take();
+    // gate();
+    // go(0, 13, 40);
+    // arcRight(140, 13);
+    // go(140, 17, 40);
+    // go(180, -4, 60);
+    // wait(150, msec);
+    // go(180, -2, 15);
+    // gate();
+    // wait(100, msec);
+    // go(180, -1, 10);
+    // wait(1.1, sec);
+    // untake();
+    // lick();
+    // take();
+    // gate();
+    // go(180, 18, 70);
+    // wait(50, msec);
+    // go(180, 5, 30);
+    // wait(475, msec);
+    // go(181, -19.5, 45);
+    // wait(150, msec);
+    // go(181, -2.5, 15);
+    // gate(); 
+    // wait(100, msec);
+    // go(181, -1.1, 10);
+    // wait(1, sec);
+    // untake();
+    // lick();
+    // gate();
 
 
 
@@ -499,36 +516,37 @@ void autonomous(void) {
     case 3 :
 
 
-    take();
     gate();
+    take();
     go(0, 13, 40);
-    arcRight(140, 13);
-    go(-140, 17, 40);
-    go(-180, -4, 60);
+    arcLeft(-140, 13);
+    go(-140, 19, 40);
+    go(-180, -5.5, 65);
     wait(150, msec);
-    go(180, -2, 15);
+    go(-180, -2, 10);
+    gate();
+    wait(100, msec);
+    go(-180, -1.5, 10);
+    wait(1.1, sec);
+    untake();
+    go(-180, 14, 60);
+    lick();
+    take();
+    go(-180, 10, 12);
+    gate();
+    wait(400, msec);
+    go(-180, -19.5, 65);
+    wait(150, msec);
+    go(-180, -2.5, 10);
     gate();
     wait(100, msec);
     go(-180, -1, 10);
     wait(1.1, sec);
     untake();
-    lick();
-    take();
-    gate();
-    go(-180, 18, 70);
-    wait(50, msec);
-    go(-180, 5, 30);
-    wait(475, msec);
-    go(-181, -19.5, 45);
-    wait(150, msec);
-    go(-181, -2.5, 15);
-    gate(); 
-    wait(100, msec);
-    go(-181, -1.1, 10);
-    wait(1, sec);
-    untake();
-    lick();
-    gate();
+    go(-180, 2, 30);
+
+ 
+
 
       break;
 
@@ -557,7 +575,6 @@ void autonomous(void) {
       go(-225, 20, 40);
       wait(150, msec);
       go(-45, -7.5, 30);
-      intake_3.setVelocity(-100, percent);
       wait(1, sec);
       untake();
       go(-45, 7.5, 50);
@@ -650,13 +667,17 @@ void autonomous(void) {
 
 
       gate();
-      go(0, 26, 60);
+      go(0, 26.5, 60);
       go(90, 0, 0);
       lick();
       take();
       wait(100, msec);
       go(90, 8, 20);
       wait(1000, msec);
+      go(90, -1, 20);
+      wait(100, msec);
+      go(90, 1, 20);
+      wait(100, msec);
       go(90, -19.5, 65);
       wait(150, msec);
       go(90, -2.5, 10);
@@ -665,91 +686,223 @@ void autonomous(void) {
       go(90, -1, 10);
       wait(3, sec);
       outake();
-      wait(500, msec);
+      wait(250, msec);
       take();
-      wait(3, sec);
-      go(90, 10, 40);
-      go(145, 30, 40);
+      wait(2, sec);
+      untake();
+      lick();
+      gate();
+      arcRight(228, 8);
       take();
-      go(180, 30, 50);
-
+      go(225, 29, 40);
+      outake();
+      wait(1, sec);
+      untake();
+      go(226, -8, 50);
+      take();
+      wait(100, msec);
+      go(180.5, 41, 60);
+      lick();
+      wait(50,msec);
+      go(136, -14, 60);
+      wait(4000, msec);
+      gate();
+      lick();
+      go(136, 15, 60);
+      go(90, 40, 60);
+      go(5, 40, 50);
+      go(5, 2, 60);
+      go(5, -4, 60);
+      go(5, 4, 60);
 
 
       break;
+
+    case 8:
+      take();
+      go(0, 15, 60);
+      go(-45, 30, 60);
+      go(-125, 40, 60);
+      go(-125, 2, 50);
+      go(-125, -4, 50);
+      go(-125, 4, 50);
+
+
+
+
   }
 }
+
+  bool tonguePis = 0;
+  bool dihState = 0;
+  bool foreskinState = 1;
+
+
+
+
+
+void afterMiddle (void) {
+  intake_1.spin(forward);
+  intake_2.spin(forward);
+  dihState = 1;
+  foreskinState = 1;
+}
+
+void intakeWithGate (void) {
+  intake_1.spin(forward);
+  intake_2.spin(forward);
+  intake_1.setVelocity(100, percent);
+  intake_2.setVelocity(100, percent);
+  dihState = 1;
+  foreskinState = 1;
+}
+
+void scoreHigh (void) {
+  
+
+  intake_1.spin(forward);
+  intake_2.spin(forward);
+  intake.setVelocity(100, percent);
+  dihState = 0;
+  foreskinState = 1;
+}
+
+void scoreMid (void) {
+  intake_1.spin(forward);
+  intake_2.spin(forward);
+  intake.setVelocity(100, percent);
+  dihState = 0;
+  foreskinState = 0;
+}
+
+void outtake(void) {
+  intake_1.spin(forward);
+  intake_2.spin(forward);
+  intake.setVelocity(-100, percent);
+  dihState = 0;
+}
+
+void intakeStop(void) {
+  intake.setStopping(brake);
+  intake.setVelocity(0, percent);
+}
+
+
+
+void left_drive(void) {
+  leftDrive.spin(forward);
+  leftDrive.setVelocity(Controller1.Axis3.value(), percent);
+}
+
+void right_drive(void) {
+  rightDrive.spin(forward);
+  rightDrive.setVelocity(Controller1.Axis2.value(), percent);
+}
+
+
+
+
+void toggleHood (void) {
+  dihState = !dihState;
+  dih.set(dihState);
+}
+
+
+
+
+
+
 
 void usercontrol(void) {
   int intake1 = 0;
   int intake2 = 0;
   int intake3 = 0;
 
-  bool tonguePis = 0;
-  bool leftPis = 0;
-  bool rightPis = 0;
+ 
 
-  intake_1.spin(forward);
-  intake_2.spin(forward);
-  intake_3.spin(forward);
+
 
   leftDrive.setStopping(coast);
   rightDrive.setStopping(coast);
 
-  while (1) {
-    if(Controller1.ButtonR1.pressing() || Controller1.ButtonR2.pressing() || Controller1.ButtonL1.pressing()) {
-      intake1 = 100;
-      intake2 = 100;
+  // while (1) {
+  //   if(Controller1.ButtonR1.pressing() || Controller1.ButtonR2.pressing() || Controller1.ButtonL1.pressing()) {
+  //     intake1 = 100;
+  //     intake2 = 100;
+  //   } else {
+  //     intake1 = 0;
+  //     intake2 = 0;
+  //   }
+
+  //   if(Controller1.ButtonR1.pressing() || Controller1.ButtonR2.pressing() || Controller1.ButtonUp.pressing()) {
+  //     intake3 = 100;
+  //   } else if(Controller1.ButtonL1.pressing() || Controller1.ButtonL2.pressing()) {
+  //     intake3 = -100;
+  //   } else {
+  //     intake3 = 0;
+  //   } 
+
+  //   if(Controller1.ButtonL2.pressing()) {
+  //     intake1 = -100;
+  //     intake2 = -100;
+  //   }
+
+
+
+
+    if (Controller1.ButtonL1.pressing() || Controller1.ButtonR1.pressing()) {
+      intake.setVelocity(100, percent);
+    }else if (Controller1.ButtonL2.pressing()) {
+      intake.setVelocity(-100, percent);
     } else {
-      intake1 = 0;
-      intake2 = 0;
+      intake.setVelocity(0, percent);
+    }
+    
+
+    if (Controller1.ButtonL1.pressing()) {
+
+
+
     }
 
-    if(Controller1.ButtonR1.pressing() || Controller1.ButtonR2.pressing() || Controller1.ButtonUp.pressing()) {
-      intake3 = 100;
-    } else if(Controller1.ButtonL1.pressing() || Controller1.ButtonL2.pressing()) {
-      intake3 = -100;
-    } else {
-      intake3 = 0;
-    } 
 
-    if(Controller1.ButtonL2.pressing()) {
-      intake1 = -100;
-      intake2 = -100;
-    }
 
-    if(Controller1.ButtonA.pressing()) {
-      leftPis = !leftPis;
-      rightPis = !rightPis;
-      waitUntil(!Controller1.ButtonA.pressing());
-    }
+
+
+
+    
 
     if(Controller1.ButtonDown.pressing()) {
       tonguePis = !tonguePis;
       waitUntil(!Controller1.ButtonDown.pressing());
     }
 
-    descoreLeft.set(leftPis);
-    descoreRight.set(rightPis);
+    dih.set(dihState);
+
     tongue.set(tonguePis);
-
-    intake_1.setVelocity(intake1, percent);
-    intake_2.setVelocity(intake2, percent);
-    intake_3.setVelocity(intake3, percent);
-
-    leftDrive.spin(forward);
-    rightDrive.spin(forward);
-
-    leftDrive.setVelocity(Controller1.Axis3.value(), percent);
-    rightDrive.setVelocity(Controller1.Axis2.value(), percent);
 
     wait(5, msec);
   }
-}
 
-int main() {
-  Competition.autonomous(autonomous);
-  Competition.drivercontrol(usercontrol);
-  pre_auton();
+
+  
+  int main() {
+    Competition.autonomous(autonomous);
+    Competition.drivercontrol(usercontrol);
+    pre_auton();
+    Controller1.ButtonR1.pressed(intakeWithGate);
+    Controller1.ButtonR1.released(intakeStop);
+    Controller1.ButtonR2.pressed(scoreHigh);
+    Controller1.ButtonR2.released(intakeStop);
+    Controller1.ButtonL1.pressed(scoreMid);
+    Controller1.ButtonL1.released(afterMiddle);
+    Controller1.ButtonL1.released(intakeStop);
+    Controller1.ButtonL2.pressed(outtake);
+    Controller1.ButtonL2.released(intakeStop);
+    Controller1.Axis3.changed(left_drive);
+    Controller1.Axis2.changed(right_drive);
+    Controller1.ButtonA.pressed(toggleHood);
+
   while (true) {
     wait(20, msec);
   }
