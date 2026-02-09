@@ -28,7 +28,7 @@ motor_group rightDrive = motor_group(backRight, midRight, frontRight);
 
 motor_group intake = motor_group(intake_1, intake_2);
 
-int auton = 1;
+int auton = 7;
 
 #define cs Controller1.Screen
 #define Button Controller1.Button  
@@ -230,6 +230,30 @@ public :
 };
 
 
+
+void FullMid(void) {
+  dih.set(1);
+  lift.set(0);
+
+  intake.setVelocity(60, percent);
+  intake.spin(forward);
+  wait(5, sec);
+  intake.stop();
+
+
+  leftDrive.setVelocity(10, percent);
+  rightDrive.setVelocity(10, percent);
+
+  leftDrive.spinFor(75, degrees, false);
+  rightDrive.spinFor(75, degrees);
+  wait(100, msec);
+  leftDrive.spinFor(-50, degrees, false);
+  rightDrive.spinFor(-50, degrees);
+
+
+
+}
+
 void PIDturn(int target) {
 
   (void)target;
@@ -279,7 +303,7 @@ void setVel(int vel) {
 
 
 
-void arcRight(float dir, float turnRad, float speed = 100) {
+void arcRight(float dir, float turnRad, float clamp = 50, float speed = 100) {
   float error = dir - gyro;
   float base  = (speed / 100) * error * turnGain;
 
@@ -292,7 +316,7 @@ void arcRight(float dir, float turnRad, float speed = 100) {
   base  = error * turnGain;
 
 
-  base = mid(base, 50, (turnRad / 5) *15);
+  base = mid(base, clamp, (turnRad / 5) *15);
 
   float leftPower = base * ((turnRad + (driveWidth/2)) / turnRad);
   float rightPower = base * ((turnRad - (driveWidth/2)) / turnRad);
@@ -314,7 +338,7 @@ void arcRight(float dir, float turnRad, float speed = 100) {
 }
 
 
-void arcLeft(float dir, float turnRad, float speed = 100) {
+void arcLeft(float dir, float turnRad, int clamp = 50, float speed = 100) {
   float error = dir - gyro;
   float base  = (speed / 100 ) * error * turnGain;
 
@@ -326,7 +350,7 @@ void arcLeft(float dir, float turnRad, float speed = 100) {
   error = dir - gyro;
   base  = error * turnGain;
 
-  base = mid(base, 50, (turnRad / 5) * 15);
+  base = mid(base, clamp, (turnRad / 5) * 15);
 
   float rightPower = base * ((turnRad + (driveWidth/2)) / turnRad);
   float leftPower = base * ((turnRad - (driveWidth/2)) / turnRad);
@@ -538,6 +562,8 @@ void go(float dir, float dist, int clamp = 60, float turnSpeed = 1, float turnRa
 
   if (dist == 0) return;
 
+  
+
   leftDrive.setStopping(brake);
   rightDrive.setStopping(brake);
 
@@ -556,7 +582,11 @@ void go(float dir, float dist, int clamp = 60, float turnSpeed = 1, float turnRa
   Brain.Screen.print("Target: %.2f", dist);
 
   if (dist > 0) {
-    while (trvld < dist) {
+
+    int timeoutCount = 0;
+
+    while (trvld < dist && timeoutCount < 150) {
+
       double pot = odom.position(degrees);  
       trvld = pot;
       
@@ -579,11 +609,19 @@ void go(float dir, float dist, int clamp = 60, float turnSpeed = 1, float turnRa
       rightDrive.spin(forward);
 
       wait(10, msec);
+      timeoutCount += 1;
+
+      
+    
     }
       leftDrive.setVelocity(0, percent);
       rightDrive.setVelocity(0, percent);
     } else {
-      while (trvld > dist) {
+
+
+      int timeoutCount = 0;
+      
+      while (trvld > dist && timeoutCount < 150) {
 
 
 
@@ -602,18 +640,22 @@ void go(float dir, float dist, int clamp = 60, float turnSpeed = 1, float turnRa
       Brain.Screen.setCursor(3, 1);
       Brain.Screen.print("err: %.2f speed: %.2f", driveErr, driveSpeed);
 
-      rightDrive.setVelocity((double)driveSpeed + angleError, percent);
-      leftDrive.setVelocity((double)driveSpeed - angleError, percent);
+      rightDrive.setVelocity((double)driveSpeed + angleError * 0.3, percent);
+      leftDrive.setVelocity((double)driveSpeed - angleError * 0.3,  percent);
 
       leftDrive.spin(forward);
       rightDrive.spin(forward);
 
       wait(10, msec);
+      timeoutCount += 1;
 
+      
       }
       leftDrive.setVelocity(0, percent);
       rightDrive.setVelocity(0, percent);
-    }
+    
+  }
+
 
     leftDrive.stop();
     rightDrive.stop();
@@ -795,51 +837,6 @@ void autonomous(void) {
 
     // go(115, -3, 30);
 
-
-
-
-
-
-
-
-
-
-    // proBono();
-    //   proBono();
-    //   flick();
-    //   go(0, 27.75, 60);
-    //   go(90, 0, 0);
-    //   lick();
-    //   take();
-    //   wait(100, msec);
-    //   go(90, 8, 20);
-    //   wait(400, msec);
-    //   go(90, -19, 65);
-    //   wait(150, msec);
-    //   go(90, -2.5, 10);
-    //   flick();
-    //   wait(100, msec);
-    //   go(90, -1, 10);
-    //   wait(1.1, sec);
-    //   untake();
-    //   lick();
-    //   flick();
-    //   arcRight(228, 8);
-    //   take();
-    //   go(225, 30, 40);
-    //   outake(50);
-    //   wait(1, sec);
-    //   untake();
-    //   go(226, -10.5, 50);
-    //   take();
-    //   wait(100, msec);
-    //   go(180.5, 46, 60);
-    //   lick();
-    //   wait(50,msec);
-    //   go(134, -11, 60);
-    //   wait(250, msec);
-    //   proBono();
-    //   take();
       
       break;
 
@@ -847,55 +844,11 @@ void autonomous(void) {
 
 
 
-        
-    flick();
-    take();
-    go(0, 13, 40);
-    arcLeft(-140, 13);
-    go(-140, -20, 40);
-    go(-140, 1, 20);
+    arcLeft(-45, 25);
 
-    flick(); 
+    lick();
 
-    // take();
-    // flick();
-    // go(0, 13, 40);
-    // arcRight(140, 13);
-    // go(140, 17, 40);
-    // go(180, -4, 60);
-    // wait(150, msec);
-    // go(180, -2, 15);
-    // flick();
-    // wait(100, msec);
-    // go(180, -1, 10);
-    // wait(1.1, sec);
-    // untake();
-    // lick();
-    // take();
-    // flick();
-    // go(180, 18, 70);
-    // wait(50, msec);
-    // go(180, 5, 30);
-    // wait(475, msec);
-    // go(181, -19.5, 45);
-    // wait(150, msec);
-    // go(181, -2.5, 15);
-    // flick(); 
-    // wait(100, msec);
-    // go(181, -1.1, 10);
-    // wait(1, sec);
-    // untake();
-    // lick();
-    // flick();
-
-
-
-    // go(180, 8, 60);
-    // go(220, -8, 70);
-    // go(165, -5, 30);
-    // flick();
-    // go(165, -15, 30);
-
+    go(-135, 0);
       
     break;
     case 3 :
@@ -1104,9 +1057,102 @@ void autonomous(void) {
 
 
 
+      flick();
+      proBono();
+
+      take();
+
+      go(0, 7, 5);
+
+      wait(2, sec);
+
+      go(0, -10);
+
+      wait(250, msec);
+
+      go(-127, 30, 20);
+
+      
 
 
-        take();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      // proBono();
+
+      // proBono();
+
+      // flick();
+
+      // go(0, 33.5);
+
+      // go(90, 0);
+
+      // lick();
+
+      // wait(400, msec);
+
+      // take();
+
+      // go(90, 6, 20);
+
+      // wait(50, msec);
+
+      // go(90, -0.25);
+
+      // wait(50, msec);
+
+      // go(90, 0.5);
+    
+      // wait(800, msec);
+
+      // go(91, -15, 40);
+
+      // arcRight(267, 8);
+
+      // untake();
+
+      // go(270, 80);
+
+      // arcRight(310, 20);
+
+      // arcLeft(266, 12, 23);
+
+      // go(270, -20, 30);
+
+      // take();
+
+      // flick();
+
+      // wait(2, sec);
+
+      // go(270, 1, 19);
+    
+      // flick();
+
+      // wait(100, msec);
+
+      // go(270, -1, 20);
+
+
+
+
+
+
+
+
+
 
       // proBono();
 
@@ -1308,6 +1354,8 @@ void usercontrol(void) {
     Controller1.Axis2.changed(right_drive);
     Controller1.ButtonA.pressed(toggleHood);
     Controller1.ButtonDown.pressed(toggleTongue);
+
+    Controller1.ButtonLeft.pressed(FullMid);
 
   while (true) {
     wait(20, msec);
