@@ -1062,7 +1062,18 @@ void autonomous(void) {
 
       take();
 
-      go(0, 7, 5);
+      go(0, 6, 5);
+
+      go(5, 0);
+
+      wait(50, msec);
+
+      go(-5, 0);
+
+      wait(50, msec);
+
+      go(0, 0);
+
 
       wait(2, sec);
 
@@ -1070,7 +1081,7 @@ void autonomous(void) {
 
       wait(250, msec);
 
-      go(-127, 30, 20);
+      go(-127, 29, 20);
 
       
 
