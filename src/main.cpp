@@ -28,7 +28,7 @@ motor_group rightDrive = motor_group(backRight, midRight, frontRight);
 
 motor_group intake = motor_group(intake_1, intake_2);
 
-int auton = 7;
+int auton = 3;
 
 #define cs Controller1.Screen
 #define Button Controller1.Button  
@@ -89,22 +89,22 @@ void pre_auton(void) {
 
     switch (auton) {
       case 1 :
-        cs.print("SOLOAWP");
+        cs.print("SOLOAWP(13)");
         break;
       case 2 :
-        cs.print("RIGHT9");
+        cs.print("COUNTERAWP(10-13)");
         break;
       case 3 :
-        cs.print("LEFT9");
+        cs.print("LEFT3-4(7)");
         break;
       case 4 :
-        cs.print("RIGHT4-3");
+        cs.print("RIGHT3-4(7)");
         break;
       case 5 :
-        cs.print("LEFT4-4");
+        cs.print("4BALLFINGER(4)");
         break;
       case 6 :
-        cs.print("SKILLS");
+        cs.print("SKILLS(75)");
         break;
     
       }
@@ -392,120 +392,6 @@ void pidTurn(double target) {
 }
 
 
-
-
-// void go(float dir, float dist, int speed, float turnSpeed = 1, float turnRad = 0) {
-//   leftDrive.setVelocity(0, percent);
-//   rightDrive.setVelocity(0, percent);
-//   leftDrive.spin(forward);
-//   rightDrive.spin(forward);
-
-//   if (dir < gyro) {
-//     turnRad = 0 - turnRad;
-//   }
-
-
-//   if (abs(angleError) > 5) {
-//     if (abs(angleError) > 4) {
-
-//       leftDrive.setStopping(brake);
-//       rightDrive.setStopping(brake);
-
-//       float error = angleError;
-//       float motorPower = 0;
-
-  
-//       while (fabs(error) > 1.0f) {
-//         error = angleError; 
-//         motorPower = error * turnGain;  
-
-//         if (motorPower > 40) motorPower = 40;
-//         if (motorPower < -40) motorPower = -40;
-
-//         if (fabs(motorPower) < 1) motorPower = 1;
-
-        
-//         float leftPower  = - turnSpeed * motorPower;
-//         float rightPower = turnSpeed * motorPower;
-
-//         leftDrive.setVelocity(leftPower, percent);
-//         rightDrive.setVelocity(rightPower, percent);
-
-//         leftDrive.spin(forward);
-//         rightDrive.spin(forward);
-
-//         wait(15, msec);
-//       }
-
-
-//       leftDrive.stop(brake);
-//       rightDrive.stop(brake);
-//       wait(75, msec); 
-//     }
-//   }
-
-
-//   if (dist == 0) return;
-
-
-//   leftDrive.setStopping(brake);
-//   rightDrive.setStopping(brake);
-
-//   wait(100, msec);
-//   dist *= wheelRatio;
-//   reset_posn();
-//   odom.resetPosition();
-
-
-//   double trvld = 0.0;
-
-
-//   if (dist > 0) {
-
-//     while (trvld < dist) {
-
-//         double pot = odom.value();  
-
-//       double driveErr = dist - trvld;
-//       double driveClamp = 75;
-//       trvld = pot / wheelRatio;
-
-//       double driveSpeed = mid(-driveClamp, (driveErr * driveGain), driveClamp);
-
-
-
-//       rightDrive.setVelocity((double)driveSpeed + angleError, percent);
-//       leftDrive.setVelocity((double)driveSpeed - angleError, percent);
-
-//       leftDrive.spin(forward);
-//       rightDrive.spin(forward);
-
-//       wait(10, msec);
-//     }
-//     leftDrive.setVelocity(0, percent);
-//     rightDrive.setVelocity(0, percent);
-//   } else {
-//     while (posn > dist) {
-//       rightDrive.setVelocity(-(float)speed, percent);
-//       leftDrive.setVelocity(-(float)speed, percent);
-
-//       leftDrive.spin(forward);
-//       rightDrive.spin(forward);
-//       wait(10, msec);
-//     }
-//     leftDrive.setVelocity(0, percent);
-//     rightDrive.setVelocity(0, percent);
-//   }
-
-//   leftDrive.stop();
-//   rightDrive.stop();
-// }
-
-
-
-
-
-
 void go(float dir, float dist, int clamp = 60, float turnSpeed = 1, float turnRad = 0) {
 
    leftDrive.setVelocity(0, percent);
@@ -519,7 +405,10 @@ void go(float dir, float dist, int clamp = 60, float turnSpeed = 1, float turnRa
 
 
   if (abs(angleError) > 5) {
-    if (abs(angleError) > 4) {
+
+    int timeoutCount = 1;
+
+    if (abs(angleError) > 4 && timeoutCount < 150) {
 
       leftDrive.setStopping(brake);
       rightDrive.setStopping(brake);
@@ -547,6 +436,7 @@ void go(float dir, float dist, int clamp = 60, float turnSpeed = 1, float turnRa
         leftDrive.spin(forward);
         rightDrive.spin(forward);
 
+        timeoutCount += 1;
         wait(15, msec);
       }
 
@@ -783,441 +673,162 @@ void autonomous(void) {
 
     go(180, 52);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // go(224, 37, 40);
-
-    // outake(60);
-
-    // wait(750, msec);
-
-    // untake();
-
-    // go(225, -12, 40);
-
-    // wait(100, msec);
-
-    // take();
-
-    // go(180, 52);
-
-    // lick();
-
-    // wait(150, msec);
-
-    // go(135, -18, 30);
-
-    // wait(100, msec);
-
-    // take();
-
-    // proBono();
-
-    // wait(600, msec);
-
-    // untake();
-
-    // go(135, 3);
-
-    // wait(250, msec);
-
-    // go(115, -3, 30);
-
       
       break;
-
     case 2 :
 
 
-
-    arcLeft(-45, 25);
-
-    lick();
-
-    go(-135, 0);
       
-    break;
+      break;
     case 3 :
 
     proBono();
 
     proBono();
-    
+
     flick();
 
-    go(0, 34);
+    go(0, 23);
 
-    go(90, 0);
+    take();
+
+    arcLeft(-45, 28, 20);
 
     lick();
 
     wait(150, msec);
 
-    take();
-
-    go(90, 7, 30);
-
-    wait(50, msec);
-
-    go(90, -0.5);
-
-    wait(50, msec);
-
-    go(90, 0.5);
-  
-    wait(500, msec);
-
-    go(91, -30, 40);
+    go(-135, -18, 50);
 
     wait(100, msec);
 
-    flick();
-    
-    wait(925, msec);
-
-    flick();
+    take(45);
 
     proBono();
 
-    lick();
-
-    arcRight(225, 7.5);
+    wait(700, msec);
 
     proBono();
 
-    take(40);
+    go(-135, 47);
 
-    go(224, 35, 40);
+    take();
 
-    outake(40);
+    arcLeft(-180, 20, 17);
 
+    go(-180, 3.5, 20);
 
- 
+    wait(400, msec);
+
+    go(-180, -3);
+
 
 
       break;
-
     case 4 :
-      
-    proBono();
-
-    proBono();
-  
-    flick();
-
-    go(0, 31.5);
-
-    go(-90, 0);
-
-    lick();
-
-    take();
-
-    wait(150, msec);
-
-    go(-90, 7, 20);
-
-    wait(50, msec);
-
-    go(-90, -0.5);
-
-    wait(50, msec);
-
-    go(-90, 0.5);
-  
-    wait(350, msec);
-
-    go(-91, -30, 40);
-
-    wait(100, msec);
-
-    flick();
-    
-    wait(925, msec);
-
-    flick();
-
-    proBono();
-
-    lick();
-
-    arcLeft(-225, 8.5);
-
-    proBono();
-
-    take(75);
-
-    go(-224, 26, 40);
-
-    lick();
-
-    wait(100, msec);
-
-    go(-44, -8);
-
-    wait(100, msec);
-
-    take();
-
-    proBono();
-
 
       
-    break;
+      break;
     case 5 :
-      flick();
+      
     
       break;
 
     case 6 :
+ 
+      proBono();
+
+      proBono();
+
       flick();
-      go(0, 26.5, 60);
-      go(90, 0, 0);
+
+      go(0, 32.5);
+
+      go(90, 0);
+
       lick();
+
+      wait(400, msec);
+
       take();
-      wait(100, msec);
-      go(90, 8, 20);
-      wait(650, msec);
-      go(90, -10, 65);
-      go(135, -10, 30);
-      go(90, -50, 50);
-      go(45, -10, 30);
-      go(-90, -10, 30);
-      wait(100, msec);
-      go(-90, -3,5, 15);
-      flick();
-      wait(100, msec);
-      go(-90, -1, 10);
-      wait(1.1, sec);
+
+      go(90, 7, 20);
+
+      wait(50, msec);
+
+      go(90, -0.25);
+
+      wait(50, msec);
+
+      go(90, 0.5);
+    
+      wait(900, msec);
+
+      go(91, -15, 40);
+
+      arcRight(266, 7);
+
       untake();
-      go(-90, 25, 40);
-      wait(650, msec);
-      go(-90, -22, 30);
-      wait(100, msec);
-      go(-90, -3,5, 15);
-      flick();
-      wait(100, msec);
-      go(-90, -1, 10);
-      wait(1.1, sec);
-      untake();
-      lick();
-      go(-90, 10, 40);
-      go(-180, 80, 60);
-      lick();
-      go(-90, 15, 40);
-      wait(650, msec);
-      go(-90, -10, 30);
-      wait(100, msec);
-      go(-45, -10, 30);
-      go(-90, 50, 40);
-      go(-135, -10, 30);
-      go(-270, -8, 30);
-      wait(100, msec);
-      go(-270, -3,5, 15);
-      flick();
-      wait(100, msec);
-      go(-270, -1, 10);
-      wait(1.1, sec);
-      untake();
-      go(-270, 25, 40);
-      wait(650, msec);
-      go(-270, -22, 30);
-      wait(100, msec);
-      go(-270, -3,5, 15);
-      flick();
-      wait(100, msec);
-      go(-270, -1, 10);
-      wait(1.1, sec);
-      untake();
-      lick();
-      go(-270, 10, 30);
-      go(-315, 20, 35);
-      go(-360, 0, 0);
-      lick();
-      wait(100, msec);
+
+      go(270, 80);
+
+      arcRight(310, 20);
+
+      arcLeft(266, 12, 39);
+
+      go(270, -20, 30);
+
       take();
-      go(-360, 30, 30);
+
+      flick();
+
+      wait(2.5, sec);
+
+      go(270, 30, 40);
+
+      flick();
+
+      wait(1.5, sec);
+
+      go(270, -1, 10);
+
+      wait(150, msec);
+
+      go(270, 3, 10);
+
+      wait(550, msec);
+
+      go(270, -30, 50);
+
+      wait(50, msec);
+
+      go(270, -5, 75);
+
+      wait(100, msec);
+
+      flick();
+
+      wait(2.5, sec);
+
+      go(270, 3);
+
+      wait(100, msec);
+    
+      go(270, -5, 40);
+
+      wait(100, msec);
+
+      go(270, 1);
+
+      wait(100, msec);
+
+      go(180, 80);
+
 
       break;
         case 7 :
 
 
-
-      flick();
-      proBono();
-
-      take();
-
-      go(0, 6, 5);
-
-      go(5, 0);
-
-      wait(50, msec);
-
-      go(-5, 0);
-
-      wait(50, msec);
-
-      go(0, 0);
-
-
-      wait(2, sec);
-
-      go(0, -10);
-
-      wait(250, msec);
-
-      go(-127, 29, 20);
-
-      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      // proBono();
-
-      // proBono();
-
-      // flick();
-
-      // go(0, 33.5);
-
-      // go(90, 0);
-
-      // lick();
-
-      // wait(400, msec);
-
-      // take();
-
-      // go(90, 6, 20);
-
-      // wait(50, msec);
-
-      // go(90, -0.25);
-
-      // wait(50, msec);
-
-      // go(90, 0.5);
-    
-      // wait(800, msec);
-
-      // go(91, -15, 40);
-
-      // arcRight(267, 8);
-
-      // untake();
-
-      // go(270, 80);
-
-      // arcRight(310, 20);
-
-      // arcLeft(266, 12, 23);
-
-      // go(270, -20, 30);
-
-      // take();
-
-      // flick();
-
-      // wait(2, sec);
-
-      // go(270, 1, 19);
-    
-      // flick();
-
-      // wait(100, msec);
-
-      // go(270, -1, 20);
-
-
-
-
-
-
-
-
-
-
-      // proBono();
-
-      // proBono();
-      
-      // flick();
-      // go(0, 27.75, 60);
-      // go(90, 0, 0);
-      // lick();
-      // take();
-      // wait(100, msec);
-      // go(90, 8, 20);
-      // wait(50, msec);
-      // go(90, -1, 30);
-      // wait(50, msec);
-      // go(90, 1, 30);
-      // wait(50, msec);
-      // go(90, -1, 30);
-      // wait(50, msec);
-      // go(90, 1, 30);
-      // wait(200, msec);
-      // go(90, -19, 65);
-      // wait(150, msec);
-      // go(90, -2.5, 10);
-      // flick();
-      // wait(100, msec);
-      // go(90, -1, 10);
-      // wait(1.1, sec);
-      // untake();
-      // lick();
-      // flick();
-      // arcRight(228, 8);
-      // take();
-      // go(225, 27.5, 40);
-      // outake(35);
-      // wait(1, sec);
-      // untake();
-      // go(226, -8, 50);
-      // take();
-      // wait(100, msec);
-      // go(180.5, 42, 60);
-      // lick();
-      // wait(50,msec);
-      // go(134, -11, 60);
-      // wait(250, msec);
-      // proBono();
-      // take();
-      // wait(4000, msec);
-      // go(136, 15, 60);
-      // go(90, 40, 15);
-      // go(5, 40, 15);
-      // go(5, 2, 15);
-      // go(5, -4, 15);
-      // go(5, 4, 15);
 
 
       break;
