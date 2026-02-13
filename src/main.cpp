@@ -924,6 +924,14 @@ proBono();
 
       arcRight(447, 7);
 
+      go(450, 80);
+
+      arcRight(490, 19);
+
+      arcLeft(446, 12, 33);
+
+      
+
 
       break;
         case 7 :
