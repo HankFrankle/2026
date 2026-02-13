@@ -28,7 +28,7 @@ motor_group rightDrive = motor_group(backRight, midRight, frontRight);
 
 motor_group intake = motor_group(intake_1, intake_2);
 
-int auton = 3;
+int auton = 6;
 
 #define cs Controller1.Screen
 #define Button Controller1.Button  
@@ -269,7 +269,7 @@ void PIDturn(int target) {
   #define gyro (int)(round(Gyro1.rotation(degrees)))
   #define posn ((rightDrive.position(degrees) + leftDrive.position(degrees)) / 2) 
   #define driveGain ((float)0.3)
-  #define turnGain ((float)0.3925)
+  #define turnGain ((float)0.41)
   #define angleError (-(dir - gyro))
 
 #define LP ( Kd * (turnRad + (driveWidth / 2)) / driveWidth)
@@ -392,23 +392,20 @@ void pidTurn(double target) {
 }
 
 
-void go(float dir, float dist, int clamp = 60, float turnSpeed = 1, float turnRad = 0) {
+void go(float dir, float dist, int clamp = 60, int timeO = 150, float turnSpeed = 1) {
 
    leftDrive.setVelocity(0, percent);
   rightDrive.setVelocity(0, percent);
   leftDrive.spin(forward);
   rightDrive.spin(forward);
 
-  if (dir < gyro) {
-    turnRad = 0 - turnRad;
-  }
-
+  
 
   if (abs(angleError) > 5) {
 
-    int timeoutCount = 1;
+    int timeoutCount = 0;
 
-    if (abs(angleError) > 4 && timeoutCount < 150) {
+    if (abs(angleError) > 4 && timeoutCount < timeO) {
 
       leftDrive.setStopping(brake);
       rightDrive.setStopping(brake);
@@ -475,7 +472,7 @@ void go(float dir, float dist, int clamp = 60, float turnSpeed = 1, float turnRa
 
     int timeoutCount = 0;
 
-    while (trvld < dist && timeoutCount < 150) {
+    while (trvld < dist && timeoutCount < timeO) {
 
       double pot = odom.position(degrees);  
       trvld = pot;
@@ -499,6 +496,9 @@ void go(float dir, float dist, int clamp = 60, float turnSpeed = 1, float turnRa
       rightDrive.spin(forward);
 
       wait(10, msec);
+
+
+
       timeoutCount += 1;
 
       
@@ -511,7 +511,7 @@ void go(float dir, float dist, int clamp = 60, float turnSpeed = 1, float turnRa
 
       int timeoutCount = 0;
       
-      while (trvld > dist && timeoutCount < 150) {
+      while (trvld > dist && timeoutCount < timeO) {
 
 
 
@@ -619,7 +619,7 @@ void autonomous(void) {
     case 1 :
 
 
-    proBono();
+proBono();
 
     proBono();
 
@@ -635,17 +635,12 @@ void autonomous(void) {
 
     take();
 
-    go(90, 6.5, 20);
+    go(90, 6, 20);
 
-    wait(50, msec);
-
-    go(90, -0.5);
-
-    wait(50, msec);
-
-    go(90, 1);
+    leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+    rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
   
-    wait(325, msec);
+    wait(350, msec);
 
     go(91, -30, 40);
 
@@ -655,23 +650,64 @@ void autonomous(void) {
     
     wait(925, msec);
 
+    arcRight(225, 8);
+    
     flick();
+    
+    lick();
+    
+    take();
 
-    proBono();
+    wait(50, msec);
+
+    lick();  
+
+    go(225, 14);
+
+    wait(25, msec);
 
     lick();
 
-    arcRight(225, 8);
+    // wait(100, msec);
+
+    go(180, 0);
+
+    lick();
+
+    go(180, 54, 70);
+
+    lick();
+
+    // go(180, 4)j;
+
+    go(135, -15.5, 50);
+
+    // wait(100, msec);
+
+    take(45);
 
     proBono();
 
-    take(75);
+    wait(750, msec);
 
-    go(225, 8);
+    proBono();
 
-    arcLeft(150, 9);
+    go(135, 45.5, 70);
 
-    go(180, 52);
+    take();
+
+    arcLeft(90, 19, 20);
+
+    leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+    rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+
+    wait(500, msec);
+
+    go(90, -30);
+
+    wait(100, msec);
+    
+    flick();
 
       
       break;
@@ -688,17 +724,17 @@ void autonomous(void) {
 
     flick();
 
-    go(0, 23);
+    go(0, 24);
 
     take();
 
-    arcLeft(-45, 28, 20);
+    arcLeft(-40, 30, 20);
 
     lick();
 
     wait(150, msec);
 
-    go(-135, -18, 50);
+    go(-135, -15.5, 50);
 
     wait(100, msec);
 
@@ -706,21 +742,46 @@ void autonomous(void) {
 
     proBono();
 
-    wait(700, msec);
+    wait(750, msec);
 
     proBono();
 
-    go(-135, 47);
+    go(-135, 48);
 
     take();
 
-    arcLeft(-180, 20, 17);
+    arcLeft(-180, 19, 17);
 
-    go(-180, 3.5, 20);
+    // go(-180, 1, 20);
 
-    wait(400, msec);
+    // wait(100, msec);
 
-    go(-180, -3);
+    // go(-180, 0.5, 10);
+
+    leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+    rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+
+    wait(600, msec);
+
+    go(-180, -30);
+
+    wait(100, msec);
+    
+    flick();
+
+    wait(900, msec);
+
+    take();
+
+    go(-180, 10, 40 );
+
+    untake();
+
+    go(-130, -18, 35);
+
+    wait(50, msec);
+
+    go(-180, -22, 35);
 
 
 
@@ -742,27 +803,30 @@ void autonomous(void) {
 
       flick();
 
-      go(0, 32.5);
+      go(0, 33);
 
       go(90, 0);
 
       lick();
 
-      wait(400, msec);
+      wait(200, msec);
 
       take();
 
-      go(90, 7, 20);
+      go(90, 6, 20);
 
-      wait(50, msec);
+      leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+      rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+  
+      wait(1.25, sec);  
 
-      go(90, -0.25);
+      go(90, -1, 25);
 
-      wait(50, msec);
+      wait(0.25, sec);
 
-      go(90, 0.5);
-    
-      wait(900, msec);
+      go(90, 2, 15);
+
+      wait(0.5, sec);
 
       go(91, -15, 40);
 
@@ -772,11 +836,15 @@ void autonomous(void) {
 
       go(270, 80);
 
-      arcRight(310, 20);
+      arcRight(310, 19);
 
-      arcLeft(266, 12, 39);
+      arcLeft(266, 12, 33);
 
-      go(270, -20, 30);
+      go(270, -23, 30);
+
+      outake();
+
+      wait(50, msec);
 
       take();
 
@@ -784,45 +852,77 @@ void autonomous(void) {
 
       wait(2.5, sec);
 
-      go(270, 30, 40);
+      go(269, 28, 30);
 
       flick();
 
-      wait(1.5, sec);
+      leftDrive.spin(vex::directionType::fwd, 2.67, vex::voltageUnits::volt);
+      rightDrive.spin(vex::directionType::fwd, 2.27, vex::voltageUnits::volt);
 
-      go(270, -1, 10);
+      wait(750, msec);
 
-      wait(150, msec);
-
-      go(270, 3, 10);
-
-      wait(550, msec);
-
-      go(270, -30, 50);
+      go(270, -1);
 
       wait(50, msec);
 
-      go(270, -5, 75);
+      go(270, 3, 20);
+
+      wait(1.5, sec);
+
+      go(270, -30, 40);
+
+      wait(50, msec);
+
+      outake();
+
+      wait(350, msec);
+
+      take();
+
+      flick();
+
+      wait(2.75, sec);
+
+      go(270, 3, 10);
 
       wait(100, msec);
 
       flick();
-
-      wait(2.5, sec);
-
-      go(270, 3);
-
-      wait(100, msec);
     
-      go(270, -5, 40);
+      go(270, -5, 20);
 
       wait(100, msec);
 
-      go(270, 1);
+      go(270, 8);
 
       wait(100, msec);
 
-      go(180, 80);
+      lick();
+
+      go(180, 110, 80, 350);
+
+      wait(150, msec);
+
+      go(270, 0);
+
+      lick();
+
+      leftDrive.spin(vex::directionType::fwd, 2.67, vex::voltageUnits::volt);
+      rightDrive.spin(vex::directionType::fwd, 2.27, vex::voltageUnits::volt);
+      
+      wait(2, sec);
+
+      go(270, -1, 25);
+
+      wait(0.25, sec);
+
+      go(270, 2, 15);
+
+      wait(1.25, sec);
+
+      go(270, -15);
+
+      arcRight(447, 7);
 
 
       break;
@@ -874,7 +974,7 @@ void scoreHigh (void) {
   intake_1.spin(forward);
   intake_2.spin(forward);
   intake_1.setVelocity(100, percent);
-  intake_2.setVelocity(75, percent);
+  intake_2.setVelocity(70, percent);
   dihState = 0;
   liftState = 1;
 }
