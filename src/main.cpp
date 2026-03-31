@@ -7,225 +7,225 @@ competition Competition;
 
 controller Controller1 = controller(primary);
 motor intake_1 = motor(PORT17, ratio6_1);
-motor intake_2 = motor(PORT20, ratio6_1, true);
+motor intake_2 = motor(PORT18, ratio6_1, true);
 
-inertial Gyro1 = inertial(PORT8);
-rotation odom = rotation(PORT9, true);
+inertial Gyro1 = inertial(PORT20);
+rotation odom = rotation(PORT19, true);
 
 digital_out dih = digital_out(Brain.ThreeWirePort.H);
-digital_out lift = digital_out(Brain.ThreeWirePort.B);
-digital_out tongue = digital_out(Brain.ThreeWirePort.A);
-digital_out intakeL = digital_out(Brain.ThreeWirePort.F);
+digital_out lift = digital_out(Brain.ThreeWirePort.F);
+digital_out tongue = digital_out(Brain.ThreeWirePort.E);
+digital_out intakeL = digital_out(Brain.ThreeWirePort.G);
 
 
-motor frontLeft = motor(PORT14, ratio6_1); 
-motor midLeft = motor(PORT13, ratio6_1, true);
-motor backLeft = motor(PORT12, ratio6_1, true);
-motor frontRight = motor(PORT16, ratio6_1, true);
+motor frontLeft = motor(PORT11, ratio6_1); 
+motor midLeft = motor(PORT12, ratio6_1, true);
+motor backLeft = motor(PORT13, ratio6_1, true);
+motor frontRight = motor(PORT14, ratio6_1, true);
 motor midRight = motor(PORT15, ratio6_1);
-motor backRight = motor(PORT11, ratio6_1);
+motor backRight = motor(PORT16, ratio6_1);
 
-motor_group leftDrive = motor_group(backLeft, midLeft, frontLeft);
-motor_group rightDrive = motor_group(backRight, midRight, frontRight);
+motor_group leftDrive = motor_group(frontLeft, midLeft, backLeft);
+motor_group rightDrive = motor_group(frontRight, midRight, backRight);
 
 motor_group intake = motor_group(intake_1, intake_2);
 
-int auton = 4;
+int auton = 1;
 
 #define cs Controller1.Screen
-#define Button Controller1.Button  
+#define Button Controller1.Button 
 
 struct Values 
 {
-  float v1;
-  float v2;  
-  float v3;
+ float v1;
+ float v2; 
+ float v3;
 };
 
 
-// This is essentially a parent PID function that we can use for all motor control shit, and we'll just have to tune the  kP, kI, and kD or each thing
+// This is essentially a parent PID function that we can use for all motor control shit, and we'll just have to tune the kP, kI, and kD or each thing
 
-Values universalPID(float target, float current, float kp, float ki, float kd, float prevErr, float integral_accum, float interval) {
+// Values universalPID(float target, float current, float kp, float ki, float kd, float prevErr, float integral_accum, float interval) {
 
-  float err = target - current;
-  float integral = integral_accum + (err * interval);
-  float derivative = (err - prevErr) / interval;
-  float control = kp * err + ki * integral + kd * derivative;
+//  float err = target - current;
+//  float integral = integral_accum + (err * interval);
+//  float derivative = (err - prevErr) / interval;
+//  float control = kp * err + ki * integral + kd * derivative;
 
-  return {control, err, integral};
-}
+//  return {control, err, integral};
+// }
 
 float mid(float f1, float f2, float f3) {
 
-  return (f1 > f2 && f1 < f3) || (f1 < f2 && f1 > f3) ? f1 :
-         (f2 > f1 && f2 < f3) || (f2 < f1 && f1 > f3) ? f2 :
-         f3;
+ return (f1 > f2 && f1 < f3) || (f1 < f2 && f1 > f3) ? f1 :
+ (f2 > f1 && f2 < f3) || (f2 < f1 && f1 > f3) ? f2 :
+ f3;
 
 }
 
 
 float low(float f1, float f2) {
 
-  return f1 < f2 ? f1 : f2;
+ return f1 < f2 ? f1 : f2;
 
 }
-  
+ 
 float high(float f1, float f2) {
 
-  return f1 > f2 ? f1 : f2;
+ return f1 > f2 ? f1 : f2;
 
 }
 
 
 void pre_auton(void) {
 
-  while (1) {
+ while (1) {
 
-    if(Controller1.ButtonB.pressing()) {
-      auton += 1;
-      waitUntil(!Controller1.ButtonB.pressing());
-    }
+ if(Controller1.ButtonB.pressing()) {
+ auton += 1;
+ waitUntil(!Controller1.ButtonB.pressing());
+ }
 
-    Controller1.Screen.clearScreen();
-    Controller1.Screen.setCursor(2,1);
+ Controller1.Screen.clearScreen();
+ Controller1.Screen.setCursor(2,1);
 
-    switch (auton) {
-      case 1 :
-        cs.print("SOLOAWP(13)");
-        break;
-      case 2 :
-        cs.print("COUNTERAWP(10-13)");
-        break;
-      case 3 :
-        cs.print("LEFT3-4(7)");
-        break;
-      case 4 :
-        cs.print("RIGHT3-4(7)");
-        break;
-      case 5 :
-        cs.print("4BALLFINGER(4)");
-        break;
-      case 6 :
-        cs.print("SKILLS(75)");
-        break;
-    
-      }
+ switch (auton) {
+ case 1 :
+ cs.print("SOLOAWP(13)");
+ break;
+ case 2 :
+ cs.print("COUNTERAWP(10-13)");
+ break;
+ case 3 :
+ cs.print("LEFT3-4(7)");
+ break;
+ case 4 :
+ cs.print("RIGHT3-4(7)");
+ break;
+ case 5 :
+ cs.print("4BALLFINGER(4)");
+ break;
+ case 6 :
+ cs.print("SKILLS(75)");
+ break;
+ 
+ }
 
-    if (Controller1.ButtonY.pressing()) {
-      return;
-    }
+ if (Controller1.ButtonY.pressing()) {
+ return;
+ }
 
-    wait(20, msec);
-  }
+ wait(20, msec);
+ }
 }
 
 
 void pid(int dir) {
-  leftDrive.setStopping(brake);
-  rightDrive.setStopping(brake);
+ leftDrive.setStopping(brake);
+ rightDrive.setStopping(brake);
 
-  float kp = 0.8f;   // This is what we have to tune for an actual PID
-  float ki = 0.0f;
-  float kd = 0.02f;
+ float kp = 0.8f; // This is what we have to tune for an actual PID
+ float ki = 0.0f;
+ float kd = 0.02f;
 
-  float p = 0.0f;
-  float i = 0.0f;  
-  float d = 0.0f;
+ float p = 0.0f;
+ float i = 0.0f; 
+ float d = 0.0f;
 
-  float PIDFinal = 0.0f;
+ float PIDFinal = 0.0f;
 
-  float iErr = 0.0f;
-  float pastErr = 0.0f;
-  float Err = 0.0f;
+ float iErr = 0.0f;
+ float pastErr = 0.0f;
+ float Err = 0.0f;
 
-  Err = (float)dir - (float)Gyro1.rotation(degrees);
+ Err = (float)dir - (float)Gyro1.rotation(degrees);
 
-  const float dt = 0.02f; 
-  const float integralLimit = 1000.0f;
+ const float dt = 0.02f; 
+ const float integralLimit = 1000.0f;
 
-  while (fabsf(Err) > 2.0f) {     
-    pastErr = Err;
-    Err = (float)dir - (float)Gyro1.rotation(degrees);
-    iErr += Err * dt;
-    
-    if (iErr > integralLimit) iErr = integralLimit;
-    if (iErr < -integralLimit) iErr = -integralLimit;
+ while (fabsf(Err) > 2.0f) { 
+ pastErr = Err;
+ Err = (float)dir - (float)Gyro1.rotation(degrees);
+ iErr += Err * dt;
+ 
+ if (iErr > integralLimit) iErr = integralLimit;
+ if (iErr < -integralLimit) iErr = -integralLimit;
 
-    p = Err * kp;
-    i = iErr * ki;
-    d = ((Err - pastErr) / dt) * kd;
+ p = Err * kp;
+ i = iErr * ki;
+ d = ((Err - pastErr) / dt) * kd;
 
-    PIDFinal = p + i + d;
+ PIDFinal = p + i + d;
 
-    if (PIDFinal > 80.0f) PIDFinal = 80.0f;
-    if (PIDFinal < -80.0f) PIDFinal = -80.0f;
+ if (PIDFinal > 80.0f) PIDFinal = 80.0f;
+ if (PIDFinal < -80.0f) PIDFinal = -80.0f;
 
-    leftDrive.setVelocity(-PIDFinal, percent);
-    rightDrive.setVelocity(PIDFinal, percent);
+ leftDrive.setVelocity(-PIDFinal, percent);
+ rightDrive.setVelocity(PIDFinal, percent);
 
-    leftDrive.spin(forward);
-    rightDrive.spin(forward);
+ leftDrive.spin(forward);
+ rightDrive.spin(forward);
 
-    wait(dt * 1000, msec);
-  }
+ wait(dt * 1000, msec);
+ }
 
-  leftDrive.stop(brake);
-  rightDrive.stop(brake);
-  wait(75, msec);
+ leftDrive.stop(brake);
+ rightDrive.stop(brake);
+ wait(75, msec);
 }
 
 class uniPID {
 private:
-  double kp;
-  double ki;
-  double kd;
-  double prevErr;
-  double integ;
-  double interval;
-  double integ_limit;
-  double output_clamp;
+ double kp;
+ double ki;
+ double kd;
+ double prevErr;
+ double integ;
+ double interval;
+ double integ_limit;
+ double output_clamp;
 
 public :
-  uniPID(double p, double i, double d, double wait_time, double integ_limit = 1000.0, double clamp = 100.0)
-    : kp(p), ki(i), kd(d), interval(wait_time), integ_limit(wait_time), output_clamp(clamp), prevErr(0), integ(0) {}
+ uniPID(double p, double i, double d, double wait_time, double integ_limit = 1000.0, double clamp = 100.0)
+ : kp(p), ki(i), kd(d), interval(wait_time), integ_limit(wait_time), output_clamp(clamp), prevErr(0), integ(0) {}
 
-  double calculate(double target, double current) {
-    double err = target - current;
+ double calculate(double target, double current) {
+ double err = target - current;
 
-    integ += err * integ;
-    integ = mid(-integ_limit, integ, integ_limit);
+ integ += err * integ;
+ integ = mid(-integ_limit, integ, integ_limit);
 
-    double deriv = (err - prevErr) / interval;
+ double deriv = (err - prevErr) / interval;
 
-    double control = kp * err + ki * integ + kd * deriv;
+ double control = kp * err + ki * integ + kd * deriv;
 
-    prevErr = err;
+ prevErr = err;
 
-    control = mid(-output_clamp, control, output_clamp);
+ control = mid(-output_clamp, control, output_clamp);
 
-    return control;
+ return control;
 
-  }
+ }
 
-  bool atTarget(double tolerance) {
-    return fabs(prevErr) < tolerance;
-  }
+ bool atTarget(double tolerance) {
+ return fabs(prevErr) < tolerance;
+ }
 
-   
-  void reset() {
-    prevErr = 0;
-    integ = 0;
-  }
+ 
+ void reset() {
+ prevErr = 0;
+ integ = 0;
+ }
 
-  void setKp(double p) {kp = p;}
-  void setKi(double i) {kp = i;}
-  void setKd(double d) {kd = d;}
-  void setLimits(double int_limit, double out_limit) {
-    integ_limit = int_limit;
-    output_clamp = out_limit;
-  }
-  double getErr() { return prevErr; }
-  double getInteg() { return integ; }
+ void setKp(double p) {kp = p;}
+ void setKi(double i) {kp = i;}
+ void setKd(double d) {kd = d;}
+ void setLimits(double int_limit, double out_limit) {
+ integ_limit = int_limit;
+ output_clamp = out_limit;
+ }
+ double getErr() { return prevErr; }
+ double getInteg() { return integ; }
 
 
 
@@ -234,45 +234,40 @@ public :
 
 
 void FullMid(void) {
-  dih.set(1);
-  lift.set(0);
+ dih.set(1);
+ lift.set(0);
 
-  intake.setVelocity(60, percent);
-  intake.spin(forward);
-  wait(5, sec);
-  intake.stop();
-
-
-  leftDrive.setVelocity(10, percent);
-  rightDrive.setVelocity(10, percent);
-
-  leftDrive.spinFor(75, degrees, false);
-  rightDrive.spinFor(75, degrees);
-  wait(100, msec);
-  leftDrive.spinFor(-50, degrees, false);
-  rightDrive.spinFor(-50, degrees);
+ intake.setVelocity(60, percent);
+ intake.spin(forward);
+ wait(5, sec);
+ intake.stop();
 
 
+ leftDrive.setVelocity(10, percent);
+ rightDrive.setVelocity(10, percent);
+
+ leftDrive.spinFor(75, degrees, false);
+ rightDrive.spinFor(75, degrees);
+ wait(100, msec);
+ leftDrive.spinFor(-50, degrees, false);
+ rightDrive.spinFor(-50, degrees);
 
 }
 
-void PIDturn(int target) {
 
-  (void)target;
-}
 
-  #define NGw ((float)48)
-  #define NGm ((float)36)
-  #define circ ((float)10.21)
+ #define NGw ((float)48)
+ #define NGm ((float)36)
+ #define circ ((float)10.21)
 
-  #define driveWidth ((float)14)
+ #define driveWidth ((float)14)
 
-  #define wheelRatio ((float)(NGw / NGm) * (360 / circ))
-  #define gyro (int)(round(Gyro1.rotation(degrees)))
-  #define posn ((rightDrive.position(degrees) + leftDrive.position(degrees)) / 2) 
-  #define driveGain ((float)0.3)
-  #define turnGain ((float)0.41)
-  #define angleError (-(dir - gyro))
+ #define wheelRatio ((float)(NGw / NGm) * (360 / circ))
+ #define gyro (int)(round(Gyro1.rotation(degrees)))
+ #define posn ((rightDrive.position(degrees) + leftDrive.position(degrees)) / 2) 
+ #define driveGain ((float)0.3)
+ #define turnGain ((float)0.4)
+ #define angleError (-(dir - gyro))
 
 #define LP ( Kd * (turnRad + (driveWidth / 2)) / driveWidth)
 #define RP ( Kd * (turnRad - (driveWidth / 2)) / driveWidth)
@@ -283,92 +278,92 @@ void PIDturn(int target) {
 #define Kd (turnGain * angleError)
 
 void reset_posn(void) {
-  rightDrive.setPosition(0, degrees);
-  leftDrive.setPosition(0, degrees);
+ rightDrive.setPosition(0, degrees);
+ leftDrive.setPosition(0, degrees);
 }
 
 void hawk(int time) {
-  intake.setVelocity(100, percent);
-  intake.spinFor(time, sec);
+ intake.setVelocity(100, percent);
+ intake.spinFor(time, sec);
 }
 
 void tuah(int time) {
-  intake.setVelocity(-100, percent);
-  intake.spinFor(time, sec);
+ intake.setVelocity(-100, percent);
+ intake.spinFor(time, sec);
 }
 
 void setVel(int vel) {
 
-  leftDrive.setVelocity(-vel, percent);
-  rightDrive.setVelocity(vel, percent);
+ leftDrive.setVelocity(-vel, percent);
+ rightDrive.setVelocity(vel, percent);
 }
 
 
 
 void arcRight(float dir, float turnRad, float clamp = 50, float speed = 100) {
-  float error = dir - gyro;
-  float base  = (speed / 100) * error * turnGain;
+ float error = dir - gyro;
+ float base = (speed / 100) * error * turnGain;
 
-  leftDrive.spin(forward);
-  rightDrive.spin(forward);
+ leftDrive.spin(forward);
+ rightDrive.spin(forward);
 
-  while (abs(error) > 1) {
+ while (abs(error) > 1) {
 
-  error = dir - gyro;
-  base  = error * turnGain;
-
-
-  base = mid(base, clamp, (turnRad / 5) *15);
-
-  float leftPower = base * ((turnRad + (driveWidth/2)) / turnRad);
-  float rightPower = base * ((turnRad - (driveWidth/2)) / turnRad);
+ error = dir - gyro;
+ base = error * turnGain;
 
 
-  leftDrive.setVelocity(leftPower, percent);
-  rightDrive.setVelocity(rightPower, percent);
+ base = mid(base, clamp, (turnRad / 5) *15);
 
-  }
+ float leftPower = base * ((turnRad + (driveWidth/2)) / turnRad);
+ float rightPower = base * ((turnRad - (driveWidth/2)) / turnRad);
 
-  leftDrive.setStopping(brake);
-  rightDrive.setStopping(brake);
 
-  
-  leftDrive.setVelocity(0, percent);
-  rightDrive.setVelocity(0, percent);
+ leftDrive.setVelocity(leftPower, percent);
+ rightDrive.setVelocity(rightPower, percent);
+
+ }
+
+ leftDrive.setStopping(brake);
+ rightDrive.setStopping(brake);
+
+ 
+ leftDrive.setVelocity(0, percent);
+ rightDrive.setVelocity(0, percent);
 
 
 }
 
 
 void arcLeft(float dir, float turnRad, int clamp = 50, float speed = 100) {
-  float error = dir - gyro;
-  float base  = (speed / 100 ) * error * turnGain;
+ float error = dir - gyro;
+ float base = (speed / 100 ) * error * turnGain;
 
-  leftDrive.spin(forward);
-  rightDrive.spin(forward);
+ leftDrive.spin(forward);
+ rightDrive.spin(forward);
 
-  while (abs(error) > 1) {
+ while (abs(error) > 1) {
 
-  error = dir - gyro;
-  base  = error * turnGain;
+ error = dir - gyro;
+ base = error * turnGain;
 
-  base = mid(base, clamp, (turnRad / 5) * 15);
+ base = mid(base, clamp, (turnRad / 5) * 15);
 
-  float rightPower = base * ((turnRad + (driveWidth/2)) / turnRad);
-  float leftPower = base * ((turnRad - (driveWidth/2)) / turnRad);
+ float rightPower = base * ((turnRad + (driveWidth/2)) / turnRad);
+ float leftPower = base * ((turnRad - (driveWidth/2)) / turnRad);
 
 
-  leftDrive.setVelocity(leftPower, percent);
-  rightDrive.setVelocity(rightPower, percent);
+ leftDrive.setVelocity(leftPower, percent);
+ rightDrive.setVelocity(rightPower, percent);
 
-  }
+ }
 
-  leftDrive.setStopping(brake);
-  rightDrive.setStopping(brake);
+ leftDrive.setStopping(brake);
+ rightDrive.setStopping(brake);
 
-  
-  leftDrive.setVelocity(0, percent);
-  rightDrive.setVelocity(0, percent);
+ 
+ leftDrive.setVelocity(0, percent);
+ rightDrive.setVelocity(0, percent);
 
 
 }
@@ -376,179 +371,179 @@ void arcLeft(float dir, float turnRad, int clamp = 50, float speed = 100) {
 
 
 void pidTurn(double target) {
-  uniPID turn(0.45, 0.05, 0.3, 0.02, 50, 40);
+ uniPID turn(0.45, 0.05, 0.3, 0.02, 50, 40);
 
-  while(!turn.atTarget(1.5)) {
-    double angle = Gyro1.rotation(degrees);
-    double power = turn.calculate(target, angle);
+ while(!turn.atTarget(1.5)) {
+ double angle = Gyro1.rotation(degrees);
+ double power = turn.calculate(target, angle);
 
-    leftDrive.setVelocity(power, percent);
-    rightDrive.setVelocity(-power, percent);
+ leftDrive.setVelocity(power, percent);
+ rightDrive.setVelocity(-power, percent);
 
-    wait(10, msec);
+ wait(10, msec);
 
-  }
+ }
 
-  leftDrive.stop();
-  rightDrive.stop();
+ leftDrive.stop();
+ rightDrive.stop();
 }
 
 
-void go(float dir, float dist, int clamp = 60, int timeO = 150, float turnClamp = 40) {
+void go(float dir, float dist, int clamp = 70, int timeO = 150, float turnClamp = 40) {
 
-   leftDrive.setVelocity(0, percent);
-  rightDrive.setVelocity(0, percent);
-  leftDrive.spin(forward);
-  rightDrive.spin(forward);
+ leftDrive.setVelocity(0, percent);
+ rightDrive.setVelocity(0, percent);
+ leftDrive.spin(forward);
+ rightDrive.spin(forward);
 
-  
+ 
 
-  if (abs(angleError) > 5) {
+ if (abs(angleError) > 5) {
 
-    int timeoutCount = 0;
+ int timeoutCount = 0;
 
-    if (abs(angleError) > 4 && timeoutCount < timeO) {
+ if (abs(angleError) > 4 && timeoutCount < timeO) {
 
-      leftDrive.setStopping(brake);
-      rightDrive.setStopping(brake);
+ leftDrive.setStopping(brake);
+ rightDrive.setStopping(brake);
 
-      float error = angleError;
-      float motorPower = 0;
+ float error = angleError;
+ float motorPower = 0;
 
-  
-      while (fabs(error) > 1.0f) {
-        error = angleError; 
-        motorPower = error * turnGain;  
+ 
+ while (fabs(error) > 1.0f) {
+ error = angleError; 
+ motorPower = error * turnGain; 
 
-        motorPower = mid(-turnClamp, motorPower, turnClamp);
+ motorPower = mid(-turnClamp, motorPower, turnClamp);
 
-        
-        float leftPower  = -motorPower;
-        float rightPower = motorPower;
+ 
+ float leftPower = -motorPower;
+ float rightPower = motorPower;
 
-        leftDrive.setVelocity(leftPower, percent);
-        rightDrive.setVelocity(rightPower, percent);
+ leftDrive.setVelocity(leftPower, percent);
+ rightDrive.setVelocity(rightPower, percent);
 
-        leftDrive.spin(forward);
-        rightDrive.spin(forward);
+ leftDrive.spin(forward);
+ rightDrive.spin(forward);
 
-        timeoutCount += 1;
-        wait(15, msec);
-      }
-
-
-      leftDrive.stop(brake);
-      rightDrive.stop(brake);
-      wait(75, msec); 
-    }
-  }
+ timeoutCount += 1;
+ wait(15, msec);
+ }
 
 
-
-
-  if (dist == 0) return;
-
-  
-
-  leftDrive.setStopping(brake);
-  rightDrive.setStopping(brake);
-
-  wait(100, msec);
-  dist *= wheelRatio;
-  reset_posn();
-  odom.setPosition(0, rev); 
-  odom.setPosition(0, deg); 
-
-  wait(100, msec);
-
-  double trvld = 0.0;
-
-  Brain.Screen.clearScreen();
-  Brain.Screen.setCursor(1, 1);
-  Brain.Screen.print("Target: %.2f", dist);
-
-  if (dist > 0) {
-
-    int timeoutCount = 0;
-
-    while (trvld < dist && timeoutCount < timeO) {
-
-      double pot = odom.position(degrees);  
-      trvld = pot;
-      
-
-      Brain.Screen.setCursor(2, 1);
-      Brain.Screen.print("pot: %.2f trvld: %.2f", pot, trvld);
-
-      double driveErr = dist - trvld;
-      double driveClamp = clamp;
-      double driveSpeed = mid(-driveClamp, (driveErr * driveGain), driveClamp);
-
-
-      Brain.Screen.setCursor(3, 1);
-      Brain.Screen.print("err: %.2f speed: %.2f", driveErr, driveSpeed);
-
-      rightDrive.setVelocity((double)driveSpeed + angleError * 0.3, percent);
-      leftDrive.setVelocity((double)driveSpeed - angleError * 0.3, percent);
-
-      leftDrive.spin(forward);
-      rightDrive.spin(forward);
-
-      wait(10, msec);
+ leftDrive.stop(brake);
+ rightDrive.stop(brake);
+ wait(75, msec); 
+ }
+ }
 
 
 
-      timeoutCount += 1;
 
-      
-    
-    }
-      leftDrive.setVelocity(0, percent);
-      rightDrive.setVelocity(0, percent);
-    } else {
+ if (dist == 0) return;
 
+ 
 
-      int timeoutCount = 0;
-      
-      while (trvld > dist && timeoutCount < timeO) {
+ leftDrive.setStopping(brake);
+ rightDrive.setStopping(brake);
 
+ wait(100, msec);
+ dist *= wheelRatio;
+ reset_posn();
+ odom.setPosition(0, rev); 
+ odom.setPosition(0, deg); 
 
+ wait(100, msec);
 
-      double pot = odom.position(degrees);  
-      trvld = pot;
-      
+ double trvld = 0.0;
 
-      Brain.Screen.setCursor(2, 1);
-      Brain.Screen.print("pot: %.2f trvld: %.2f", pot, trvld);
+ Brain.Screen.clearScreen();
+ Brain.Screen.setCursor(1, 1);
+ Brain.Screen.print("Target: %.2f", dist);
 
-      double driveErr = dist - trvld;
-      double driveClamp = clamp;
-      double driveSpeed = mid(-driveClamp, (driveErr * driveGain), driveClamp);
+ if (dist > 0) {
 
+ int timeoutCount = 0;
 
-      Brain.Screen.setCursor(3, 1);
-      Brain.Screen.print("err: %.2f speed: %.2f", driveErr, driveSpeed);
+ while (trvld < dist && timeoutCount < timeO) {
 
-      rightDrive.setVelocity((double)driveSpeed + angleError * 0.3, percent);
-      leftDrive.setVelocity((double)driveSpeed - angleError * 0.3,  percent);
+ double pot = odom.position(degrees); 
+ trvld = pot;
+ 
 
-      leftDrive.spin(forward);
-      rightDrive.spin(forward);
+ Brain.Screen.setCursor(2, 1);
+ Brain.Screen.print("pot: %.2f trvld: %.2f", pot, trvld);
 
-      wait(10, msec);
-      timeoutCount += 1;
-
-      
-      }
-      leftDrive.setVelocity(0, percent);
-      rightDrive.setVelocity(0, percent);
-    
-  }
+ double driveErr = dist - trvld;
+ double driveClamp = clamp;
+ double driveSpeed = mid(-driveClamp, (driveErr * driveGain), driveClamp);
 
 
-    leftDrive.stop();
-    rightDrive.stop();
-  }
+ Brain.Screen.setCursor(3, 1);
+ Brain.Screen.print("err: %.2f speed: %.2f", driveErr, driveSpeed);
+
+ rightDrive.setVelocity((double)driveSpeed + angleError * 0.3, percent);
+ leftDrive.setVelocity((double)driveSpeed - angleError * 0.3, percent);
+
+ leftDrive.spin(forward);
+ rightDrive.spin(forward);
+
+ wait(10, msec);
+
+
+
+ timeoutCount += 1;
+
+ 
+ 
+ }
+ leftDrive.setVelocity(0, percent);
+ rightDrive.setVelocity(0, percent);
+ } else {
+
+
+ int timeoutCount = 0;
+ 
+ while (trvld > dist && timeoutCount < timeO) {
+
+
+
+ double pot = odom.position(degrees); 
+ trvld = pot;
+ 
+
+ Brain.Screen.setCursor(2, 1);
+ Brain.Screen.print("pot: %.2f trvld: %.2f", pot, trvld);
+
+ double driveErr = dist - trvld;
+ double driveClamp = clamp;
+ double driveSpeed = mid(-driveClamp, (driveErr * driveGain), driveClamp);
+
+
+ Brain.Screen.setCursor(3, 1);
+ Brain.Screen.print("err: %.2f speed: %.2f", driveErr, driveSpeed);
+
+ rightDrive.setVelocity((double)driveSpeed + angleError * 0.3, percent);
+ leftDrive.setVelocity((double)driveSpeed - angleError * 0.3, percent);
+
+ leftDrive.spin(forward);
+ rightDrive.spin(forward);
+
+ wait(10, msec);
+ timeoutCount += 1;
+
+ 
+ }
+ leftDrive.setVelocity(0, percent);
+ rightDrive.setVelocity(0, percent);
+ 
+ }
+
+
+ leftDrive.stop();
+ rightDrive.stop();
+ }
 
 
 
@@ -577,608 +572,604 @@ bool intakeLift = 0;
 
 
 void flick(void) {
-  dihState = !dihState;
-  dih.set(dihState);
+ dihState = !dihState;
+ dih.set(dihState);
 }
 
 void lick(void) {
-  tongueState = !tongueState;
-  tongue.set(tongueState);
+ tongueState = !tongueState;
+ tongue.set(tongueState);
 }
 
 void take(int sped = 100) {
-  intake.setVelocity(sped, percent);
-  intake.spin(forward);
+ intake.setVelocity(sped, percent);
+ intake.spin(forward);
 }
 
 void outake(float sped = 95) {
-  intake.setVelocity(-sped, percent);
-  intake.spin(forward);
+ intake.setVelocity(-sped, percent);
+ intake.spin(forward);
 }
 
 void untake() {
-  intake.stop();
+ intake.stop();
 }
 
 void proBono (void) {
-  if(lift.value() == 0) {
-    lift.set(1);
-  } else if(lift.value() == 1) {
-    lift.set(0);
-  }
+ if(lift.value() == 0) {
+ lift.set(1);
+ } else if(lift.value() == 1) {
+ lift.set(0);
+ }
 }
 
 
 
 
 void autonomous(void) {
-  leftDrive.setStopping(brake);
-  rightDrive.setStopping(brake);
+ leftDrive.setStopping(brake);
+ rightDrive.setStopping(brake);
 
-  switch (auton) {
-    case 1 :
+ switch (auton) {
+ case 1 :
 
 
-proBono();
+ proBono();
 
-    proBono();
+ proBono();
 
-    flick();
+ flick();
 
-    go(0, 33);
+ go(0, 33, 65);
 
-    go(90, 0);
+ go(90, 0);
 
-    lick();
+ lick();
 
-    wait(200, msec);
+ wait(200, msec);
 
-    take();
+ take();
 
-    go(90, 6, 20);
+ go(90, 6, 20);
 
-    leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
-    rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
-  
-    wait(350, msec);
+ leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ 
+ wait(260, msec);
 
-    go(91, -30, 40);
+ go(91, -30, 40);
 
-    wait(100, msec);
+ wait(100, msec);
 
-    flick();
-    
-    wait(925, msec);
+ flick();
+ 
+ wait(750, msec);
 
-    arcRight(225, 8);
-    
-    flick();
-    
-    lick();
-    
-    take();
+ lick();
 
-    wait(50, msec);
+ arcRight(192, 5);
+ 
+ flick();
+ 
+ take();
 
-    go(225, 23, 40);
+ wait(25, msec);
 
-    wait(25, msec);
+ go(217, 20, 40);
 
-    lick();
+ wait(25, msec);
 
-    // wait(100, msec);
+ lick();
 
-    go(180, 0);
+ wait(50, msec);
 
-    lick();
+ go(176, 0);
 
-    go(180, 46, 70);
+ go(180, 52, 70);
 
-    lick();
+ // go(180, 4)j;
 
-    // go(180, 4)j;
+ go(135, -15, 50, 150, 50);
 
-    go(135, -15.5, 50, 150, 50);
+ wait(100, msec);
 
-    wait(100, msec);
+ take(45);
 
-    take(45);
+ proBono();
 
-    proBono();
+ wait(750, msec);
 
-    wait(750, msec);
+ proBono();
 
-    proBono();
+ go(135, 48, 70);
 
-    go(135, 45, 70);
+ take();
 
-    take();
+ arcLeft(80, 19, 35);
 
-    arcLeft(90, 19, 35);
+ leftDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
+ rightDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
 
-    leftDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
-    rightDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
+ wait(350, msec);
 
-    wait(350, msec);
+ go(90, -28, 80);
+ 
+ flick();
 
-    go(90, -28, 80);
-    
-    flick();
+ 
+ break;
+ case 2 :
 
-      
-      break;
-    case 2 :
 
+ 
+ break;
+ case 3 :
 
-      
-      break;
-    case 3 :
+ proBono();
 
-    proBono();
+ proBono();
 
-    proBono();
+ flick();
 
-    flick();
+ go(0, 24);
 
-    go(0, 24);
+ take();
 
-    take();
+ arcLeft(-40, 30, 20);
 
-    arcLeft(-40, 30, 20);
+ lick();
 
-    lick();
+ wait(150, msec);
 
-    wait(150, msec);
+ go(-135, -16, 50);
 
-    go(-135, -16, 50);
+ wait(100, msec);
 
-    wait(100, msec);
+ take(45);
 
-    take(45);
+ proBono();
 
-    proBono();
+ wait(750, msec);
 
-    wait(750, msec);
+ proBono();
 
-    proBono();
+ go(-133, 49);
 
-    go(-133, 49);
+ take();
 
-    take();
+ arcLeft(-180, 17, 15);
 
-    arcLeft(-180, 17, 15);
+ // go(-180, 1, 20);
 
-    // go(-180, 1, 20);
+ // wait(100, msec);
 
-    // wait(100, msec);
+ // go(-180, 0.5, 10);
 
-    // go(-180, 0.5, 10);
+ leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
 
-    leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
-    rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ wait(600, msec);
 
-    wait(600, msec);
+ go(-178, -30);
 
-    go(-178, -30);
+ wait(100, msec);
+ 
+ flick();
 
-    wait(100, msec);
-    
-    flick();
+ wait(900, msec);
 
-    wait(900, msec);
+ take();
 
-    take();
+ go(-180, 10, 40 );
 
-    go(-180, 10, 40 );
+ untake();
 
-    untake();
+ go(-130, -18, 35);
 
-    go(-130, -18, 35);
+ wait(50, msec);
 
-    wait(50, msec);
+ go(-180, -22, 35);
 
-    go(-180, -22, 35);
 
 
+ break;
+ case 4 :
 
-      break;
-    case 4 :
 
+ proBono();
 
-    proBono();
+ proBono();
 
-    proBono();
+ flick();
 
-    flick();
+ go(0, 24);
 
-    go(0, 24);
+ take();
 
-    take();
+ arcRight(45, 31, 20);
 
-    arcRight(45, 31, 20);
+ wait(150, msec);
 
-    wait(150, msec);
+ go(-45, 14.5, 50);
 
-    go(-45, 14.5, 50);
+ wait(100, msec);
 
-    wait(100, msec);
+ outake();
 
-    outake();
+ wait(800, msec);
 
-    wait(800, msec);
+ // take();
 
-    // take();
+ go(-47, -52);
 
-    go(-47, -52);
+ take();
 
-    take();
+ wait(250, msec);
 
-    wait(250, msec);
+ go(180, 0);
 
-    go(180, 0);
+ lick();
 
-    lick();
+ wait(200, msec);
 
-    wait(200, msec);
+ // go(-180, 1, 20);
 
-    // go(-180, 1, 20);
+ // wait(100, msec);
 
-    // wait(100, msec);
+ // go(-180, 0.5, 10);
 
-    // go(-180, 0.5, 10);
+ leftDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
+ rightDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
 
-    leftDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
-    rightDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
+ wait(800, msec);
 
-    wait(800, msec);
+ go(180, -30, 40);
 
-    go(180, -30, 40);
+ wait(100, msec);
+ 
+ flick();
 
-    wait(100, msec);
-    
-    flick();
+ wait(900, msec);
 
-    wait(900, msec);
+ take();
 
-    take();
+ go(180, 10.5, 40 );
 
-    go(180, 10.5, 40 );
+ untake();
 
-    untake();
+ go(220, -19, 35);
 
-    go(220, -19, 35);
+ wait(50, msec);
 
-    wait(50, msec);
+ go(180, -22, 35);
+ 
+ break;
+ case 5 :
+ 
+ 
+ break;
 
-    go(180, -22, 35);
-      
-      break;
-    case 5 :
-      
-    
-      break;
-
-    case 6 :
+ case 6 :
 
 
 
  
-    proBono();
+ proBono();
 
-    proBono();
+ proBono();
 
-    flick();
+ flick();
 
-    go(0, 33);
+ go(0, 33);
 
-    go(90, 0);
+ go(90, 0);
 
-    lick();
+ lick();
 
-    wait(200, msec);
+ wait(200, msec);
 
-    take();
+ take();
 
-    go(90, 6, 20);
+ go(90, 6, 20);
 
-    leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
-    rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
 
-    wait(1.25, sec);  
+ wait(1.25, sec); 
 
-    go(90, -1, 25);
+ go(90, -1, 25);
 
-    wait(0.25, sec);
+ wait(0.25, sec);
 
-    go(90, 2, 15);
+ go(90, 2, 15);
 
-    wait(0.5, sec);
+ wait(0.5, sec);
 
-    go(91, -15, 40);
+ go(91, -15, 40);
 
-    arcRight(266, 7);
+ arcRight(266, 7);
 
-    untake();
+ untake();
 
-    go(270, 80);
+ go(270, 80);
 
-    arcRight(310, 19);
+ arcRight(310, 19);
 
-    arcLeft(266, 12, 32);
+ arcLeft(266, 12, 32);
 
-    go(270, -23, 30);
+ go(270, -23, 30);
 
-    outake();
+ outake();
 
-    wait(50, msec);
+ wait(50, msec);
 
-    take();
+ take();
 
-    flick();
+ flick();
 
-    wait(2.5, sec);
+ wait(2.5, sec);
 
-    go(269, 26, 30);
+ go(269, 26, 30);
 
-    flick();
+ flick();
 
-    leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
-    rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
 
-    wait(850, msec);
+ wait(850, msec);
 
-    go(270, -1);
+ go(270, -1);
 
-    wait(50, msec);
+ wait(50, msec);
 
-    go(270, 3, 20);
+ go(270, 3, 20);
 
-    wait(1.5, sec);
+ wait(1.5, sec);
 
-    go(268, -30, 40);
+ go(268, -30, 40);
 
-    wait(50, msec);
+ wait(50, msec);
 
-    outake();
+ outake();
 
-    wait(100, msec);
+ wait(100, msec);
 
-    take();
+ take();
 
-    flick();
+ flick();
 
-    wait(2.75, sec);
+ wait(2.75, sec);
 
-    go(270, 3, 10);
+ go(270, 3, 10);
 
-    wait(100, msec);
+ wait(100, msec);
 
-    flick();
-  
-    go(270, -5, 25);
+ flick();
+ 
+ go(270, -5, 25);
 
-    wait(100, msec);
+ wait(100, msec);
 
-    go(270, 8);
+ go(270, 8);
 
-    wait(100, msec);
+ wait(100, msec);
 
-    lick();
+ lick();
 
-    go(180, 109, 75, 300);
+ go(180, 109, 75, 300);
 
-    wait(250, msec);
+ wait(250, msec);
 
-    go(270, 0);
+ go(270, 0);
 
-    lick();
+ lick();
 
-    wait(200, msec);
+ wait(200, msec);
 
-    take();
+ take();
 
-    go(270, 6, 20);
+ go(270, 6, 20);
 
-    leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
-    rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
 
-    wait(2.25, sec);  
+ wait(2.25, sec); 
 
-    go(270, -1, 25);
+ go(270, -1, 25);
 
-    wait(0.25, sec);
+ wait(0.25, sec);
 
-    go(270, 2, 15);
+ go(270, 2, 15);
 
-    wait(0.5, sec);
+ wait(0.5, sec);
 
-    go(271, -15, 40);
+ go(271, -15, 40);
 
-    arcRight(446, 8);
+ arcRight(446, 8);
 
-    untake();
+ untake();
 
-    go(450, 80);
+ go(450, 80);
 
-    arcRight(490, 19);
+ arcRight(490, 19);
 
-    arcLeft(446, 12, 41);
+ arcLeft(446, 12, 41);
 
-    go(450, -23, 30);
+ go(450, -23, 30);
 
-    outake();
+ outake();
 
-    wait(50, msec);
+ wait(50, msec);
 
-    take();
+ take();
 
-    flick();
+ flick();
 
-    wait(2.5, sec);
+ wait(2.5, sec);
 
-    go(449, 26, 30);
+ go(449, 26, 30);
 
-    flick();
+ flick();
 
-    leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
-    rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
 
-    wait(1.25, sec);
+ wait(1.25, sec);
 
-    go(450, -1);
+ go(450, -1);
 
-    wait(50, msec);
+ wait(50, msec);
 
-    go(450, 3, 20);
+ go(450, 3, 20);
 
-    wait(1.5, sec);
+ wait(1.5, sec);
 
-    go(450, -30, 40);
+ go(450, -30, 40);
 
-    wait(50, msec);
+ wait(50, msec);
 
-    outake();
+ outake();
 
-    wait(100, msec);
+ wait(100, msec);
 
-    take();
+ take();
 
-    flick();
+ flick();
 
-    wait(2.75, sec);
+ wait(2.75, sec);
 
-    go(450, 3, 10);
+ go(450, 3, 10);
 
-    wait(100, msec);
+ wait(100, msec);
 
-    flick();
-  
-    go(450, -5, 25);
+ flick();
+ 
+ go(450, -5, 25);
 
-    wait(100, msec);
+ wait(100, msec);
 
-    lick();
+ lick();
 
-    go(450, 10);
+ go(450, 10);
 
-    go(580, -40);
+ go(580, -40);
 
-    go(550, -30, 40);
+ go(550, -30, 40);
 
 
 
 
 
-      break;
-        case 7 :
+ break;
+ case 7 :
 
 
 
 
-      break;
+ break;
 
-    case 8:
-      // take();
-      // go(0, 15, 60);
-      // go(-45, 30, 60);
-      // go(-125, 40, 60);
-      // go(-125, 2, 50);
-      // go(-125, -4, 50);
-      // go(-125, 4, 50);
+ case 8:
+ // take();
+ // go(0, 15, 60);
+ // go(-45, 30, 60);
+ // go(-125, 40, 60);
+ // go(-125, 2, 50);
+ // go(-125, -4, 50);
+ // go(-125, 4, 50);
 
 
-      go(0, -10);
+ go(0, -10);
 
 
-  }
+ }
 }
 
 
 
 
 void afterMiddle (void) {
-  intake_1.spin(forward);
-  intake_2.spin(forward);
-  dihState = 1;
-  liftState = 1;
+ intake_1.spin(forward);
+ intake_2.spin(forward);
+ dihState = 1;
+ liftState = 1;
 }
 
 void intakeWithflick (void) {
-  intake_1.spin(forward);
-  intake_2.spin(forward);
-  intake_1.setVelocity(100, percent);
-  intake_2.setVelocity(75, percent);
-  dihState = 1;
-  liftState = 1;
+ intake_1.spin(forward);
+ intake_2.spin(forward);
+ intake_1.setVelocity(100, percent);
+ intake_2.setVelocity(75, percent);
+ dihState = 1;
+ liftState = 1;
 }
 
 void scoreHigh (void) {
-  
+ 
 
-  intake_1.spin(forward);
-  intake_2.spin(forward);
-  intake_1.setVelocity(100, percent);
-  intake_2.setVelocity(70, percent);
-  dihState = 0;
-  liftState = 1;
+ intake_1.spin(forward);
+ intake_2.spin(forward);
+ intake_1.setVelocity(100, percent);
+ intake_2.setVelocity(70, percent);
+ dihState = 0;
+ liftState = 1;
 }
 
 void scoreMid (void) {
-  intake_1.spin(forward);
-  intake_2.spin(forward);
-  intake_1.setVelocity(100, percent);
-  intake_2.setVelocity(50, percent);
-  dihState = 1;
-  liftState = 0;
+ intake_1.spin(forward);
+ intake_2.spin(forward);
+ intake_1.setVelocity(100, percent);
+ intake_2.setVelocity(50, percent);
+ dihState = 1;
+ liftState = 0;
 }
 
 void outtake(void) {
-  intake_1.spin(forward);
-  intake_2.spin(forward);
-  intake.setVelocity(-100, percent);
-  dihState = 1;
+ intake_1.spin(forward);
+ intake_2.spin(forward);
+ intake.setVelocity(-100, percent);
+ dihState = 1;
 }
 
 void intakeStop(void) {
-  intake.setStopping(brake);
-  intake.setVelocity(0, percent);
+ intake.setStopping(brake);
+ intake.setVelocity(0, percent);
 }
 
 void afterHighScore(void) {
-  dihState = 1;
-  liftState = 1;
+ dihState = 1;
+ liftState = 1;
 }
 
 
 
 void left_drive(void) {
-  leftDrive.spin(forward);
-  leftDrive.setVelocity(Controller1.Axis3.value(), percent);
+ leftDrive.spin(forward);
+ leftDrive.setVelocity(Controller1.Axis3.value(), percent);
 }
 
 void right_drive(void) {
-  rightDrive.spin(forward);
-  rightDrive.setVelocity(Controller1.Axis2.value(), percent);
+ rightDrive.spin(forward);
+ rightDrive.setVelocity(Controller1.Axis2.value(), percent);
 }
 
 
 
 
 void toggleHood (void) {
-  dihState = !dihState;
-  dih.set(dihState);
+ dihState = !dihState;
+ dih.set(dihState);
 }
 
 void toggleIntakeLift(void) {
-  intakeLift = !intakeLift;
-  intakeL.set(intakeLift);
+ intakeLift = !intakeLift;
+ intakeL.set(intakeLift);
 
 
 }
 
 void toggleTongue (void) {
-  tongueState = !tongueState;
-  tongue.set(tongueState);
+ tongueState = !tongueState;
+ tongue.set(tongueState);
 }
 
 
@@ -1186,62 +1177,63 @@ void toggleTongue (void) {
 
 
 void usercontrol(void) {
-  int intake1 = 0;
-  int intake2 = 0;
-  int intake3 = 0;
+ int intake1 = 0;
+ int intake2 = 0;
+ int intake3 = 0;
 
-  proBono();
+ proBono();
 
  
 
-  leftDrive.setStopping(coast);
-  rightDrive.setStopping(coast);
+ leftDrive.setStopping(coast);
+ rightDrive.setStopping(coast);
 
-  while (1) {
+ while (1) {
 
-    // if(Controller1.ButtonL2.pressing() && Controller1.ButtonR2.pressing()) {
-    //   intake_1.spin(forward);
-    //   intake_2.spin(forward);
-    //   intake.setVelocity(-100, percent);
-    //   dihState = 1;
-      
-    // } else{
-    //   intake.stop();
-    // }
+ // if(Controller1.ButtonL2.pressing() && Controller1.ButtonR2.pressing()) {
+ // intake_1.spin(forward);
+ // intake_2.spin(forward);
+ // intake.setVelocity(-100, percent);
+ // dihState = 1;
+ 
+ // } else{
+ // intake.stop();
+ // }
 
-    dih.set(dihState);
-    tongue.set(tongueState);
-    lift.set(liftState);
+ dih.set(dihState);
+ tongue.set(tongueState);
+ lift.set(liftState);
 
-    wait(5, msec);
-    }
-  }
+ wait(5, msec);
+ }
+ }
 
 
-  
-  int main() {
-    Competition.autonomous(autonomous);
-    Competition.drivercontrol(usercontrol);
-    pre_auton();
-    Controller1.ButtonR1.pressed(intakeWithflick);
-    Controller1.ButtonR1.released(intakeStop);
-    Controller1.ButtonR2.pressed(scoreHigh);
-    Controller1.ButtonR2.released(intakeStop);
-    Controller1.ButtonR2.released(afterHighScore);
-    Controller1.ButtonL1.pressed(scoreMid);
-    Controller1.ButtonL1.released(afterMiddle);
-    Controller1.ButtonL1.released(intakeStop);
-    Controller1.ButtonL2.pressed(toggleHood);
-    Controller1.ButtonL2.released(intakeStop);
-    Controller1.Axis3.changed(left_drive);
-    Controller1.Axis2.changed(right_drive);
-    Controller1.ButtonA.pressed(toggleIntakeLift);
-    Controller1.ButtonUp.pressed(outtake);
-    Controller1.ButtonDown.pressed(toggleTongue);
-    Controller1.ButtonLeft.pressed(FullMid);
+ 
+ int main() {
+ Competition.autonomous(autonomous);
+ Competition.drivercontrol(usercontrol);
+ pre_auton();
+ Controller1.ButtonR1.pressed(intakeWithflick);
+ Controller1.ButtonR1.released(intakeStop);
+ Controller1.ButtonR2.pressed(scoreHigh);
+ Controller1.ButtonR2.released(intakeStop);
+ Controller1.ButtonR2.released(afterHighScore);
+ Controller1.ButtonL1.pressed(scoreMid);
+ Controller1.ButtonL1.released(afterMiddle);
+ Controller1.ButtonL1.released(intakeStop);
+ Controller1.ButtonL2.pressed([]() { dihState = 0; dih.set(1); });
+ Controller1.ButtonL2.released([]() { dihState = 1; dih.set(0); });
+ Controller1.Axis3.changed(left_drive);
+ Controller1.Axis2.changed(right_drive);
+ Controller1.ButtonA.pressed(toggleIntakeLift);
+ Controller1.ButtonUp.pressed(outtake);
+ Controller1.ButtonUp.released(intakeStop);
+ Controller1.ButtonDown.pressed(toggleTongue);
+ Controller1.ButtonLeft.pressed(FullMid);
 
-  while (true) {
-    wait(20, msec);
-  }
-  return(0);
+ while (true) {
+ wait(20, msec);
+ }
+ return(0);
 }
