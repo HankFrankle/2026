@@ -586,6 +586,13 @@ void take(int sped = 100) {
  intake.spin(forward);
 }
 
+void mid(void) {
+    intake.setVelocity(70, percent);
+    intake.spin(forward);
+    liftState = 0;
+    lift.set(liftState);
+}
+
 void outake(float sped = 95) {
  intake.setVelocity(-sped, percent);
  intake.spin(forward);
@@ -620,9 +627,9 @@ void autonomous(void) {
 
  flick();
 
- go(0, 33, 65);
+ go(0, 34, 65);
 
- go(90, 0);
+ go(90, 0, 70, 150, 45);
 
  lick();
 
@@ -635,7 +642,7 @@ void autonomous(void) {
  leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
  rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
  
- wait(260, msec);
+ wait(240, msec);
 
  go(91, -30, 40);
 
@@ -643,58 +650,75 @@ void autonomous(void) {
 
  flick();
  
- wait(750, msec);
+ wait(700, msec);
 
  lick();
 
- arcRight(192, 5);
- 
+ arcRight(192, 9);
+
  flick();
  
- take();
-
- wait(25, msec);
-
- go(217, 20, 40);
-
- wait(25, msec);
+ arcLeft(136, 43, 76);
 
  lick();
 
  wait(50, msec);
 
- go(176, 0);
+ go(135, -22, 25);
 
- go(180, 52, 70);
+ mid();
 
- // go(180, 4)j;
 
- go(135, -15, 50, 150, 50);
 
- wait(100, msec);
 
- take(45);
-
- proBono();
-
- wait(750, msec);
-
- proBono();
-
- go(135, 48, 70);
-
- take();
-
- arcLeft(80, 19, 35);
-
- leftDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
- rightDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
-
- wait(350, msec);
-
- go(90, -28, 80);
+//  arcRight(192, 4.5);
  
- flick();
+//  flick();
+ 
+//  take();
+
+//  wait(25, msec);
+
+//  go(217, 20, 40);
+
+//  wait(50, msec);
+
+//  go(170, 0, 70, 150, 25);
+
+//  wait(25, msec);
+
+//  go(180, 56, 80);
+
+//  lick();
+
+//  // go(180, 4)j;
+
+//  go(135, -15, 50, 150, 50);
+
+//  wait(100, msec);
+
+//  take(45);
+
+//  proBono();
+
+//  wait(750, msec);
+
+//  proBono();
+
+//  go(135, 48, 70);
+
+//  take();
+
+//  arcLeft(80, 19, 35);
+
+//  leftDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
+//  rightDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
+
+//  wait(300, msec);
+
+//  go(90, -28, 65);
+ 
+//  flick();
 
  
  break;
@@ -1131,7 +1155,7 @@ void outtake(void) {
 }
 
 void intakeStop(void) {
- intake.setStopping(brake);
+ intake.setStopping(coast);
  intake.setVelocity(0, percent);
 }
 
