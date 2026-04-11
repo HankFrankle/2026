@@ -30,7 +30,7 @@ motor_group rightDrive = motor_group(frontRight, midRight, backRight);
 
 motor_group intake = motor_group(intake_1, intake_2);
 
-int auton = 1;
+int auton = 3;
 
 #define cs Controller1.Screen
 #define Button Controller1.Button 
@@ -89,12 +89,13 @@ void pre_auton(void) {
  Controller1.Screen.clearScreen();
  Controller1.Screen.setCursor(2,1);
 
+ 
  switch (auton) {
  case 1 :
  cs.print("SOLOAWP(13)");
  break;
  case 2 :
- cs.print("COUNTERAWP(10-13)");
+//  cs.print("COUNTERAWP(10-13)");
  break;
  case 3 :
  cs.print("LEFT3-4(7)");
@@ -610,6 +611,60 @@ void proBono (void) {
  }
 }
 
+bool antiJamEnable = 0;
+
+int antiJamThread(void*) {
+    while (true) {
+    
+            if(antiJamEnable == 1) {
+                if(abs(intake_1.velocity(rpm)) <= 15 && intake_1.power(watt) >= 2.5) {
+
+                    intake_1.spin(forward);
+                    intake_1.setVelocity(-75, percent);
+                    wait(300, msec);
+                    intake_1.setVelocity(0, percent);
+
+                    Brain.Screen.clearScreen();
+                    Brain.Screen.setCursor(1, 1);
+                    Brain.Screen.print("Jammed");
+
+                }
+            }
+
+
+        task::sleep(20);
+    }
+    return 0;
+}
+
+
+bool midMoveLickEnable = false;
+int midMoveLickWaitTime = 0;
+
+int midMoveLick(void*) {
+    while (true) {
+        if (midMoveLickEnable) {
+            Brain.Screen.clearScreen();
+            Brain.Screen.setCursor(1, 1);
+            Brain.Screen.print("thread fired");   // does this appear?
+            wait(midMoveLickWaitTime, msec);
+            tongueState = 1;
+            tongue.set(1);
+            midMoveLickEnable = false;
+        }
+        task::sleep(20);
+    }
+    return 0;
+}
+
+void suck(int time) {
+    midMoveLickWaitTime = time;
+    midMoveLickEnable = true;
+    Brain.Screen.clearScreen();
+    Brain.Screen.setCursor(2, 1);
+    Brain.Screen.print("suck called");   // does this appear?
+}
+
 
 
 
@@ -654,19 +709,25 @@ void autonomous(void) {
 
  lick();
 
- arcRight(192, 9);
+ arcRight(200, 8.5);
 
  flick();
+
+ antiJamEnable = 1;
  
- arcLeft(136, 43, 76);
+ arcLeft(190, 43, 68);
+
+ arcLeft(160, 105, 76);
 
  lick();
 
  wait(50, msec);
 
- go(135, -22, 25);
+ go(138, -45, 25);
 
  mid();
+
+ antiJamEnable = 0;
 
 
 
@@ -724,75 +785,96 @@ void autonomous(void) {
  break;
  case 2 :
 
+ take();
+
+ proBono();
+
+ flick();
+
+ go(0, 8, 60);
+
+ suck(300);
+
+ arcRight(130, 13.6);
+
+ go(130, 25);
+
+ wait(250, msec);
+
+ go(180, 0);
+
+ wait(100, msec);
+
+ leftDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
+ rightDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);\
+
+ wait(850, msec);
+
+ go(182, -32, 60);
+
+ flick();
+
+ take();
+
+ wait(1.75, sec);
+
+ lick();
+
+ go(180, -0.5);
+
+ arcLeft(95, 10);
+
+ go(180, -23, 30);
+
+ leftDrive.setStopping(hold);
+ rightDrive.setStopping(hold);
+
+
+
+
+
+
 
  
  break;
  case 3 :
 
- proBono();
+ take();
 
  proBono();
 
  flick();
 
- go(0, 24);
+ go(0, 8, 60);
+
+ suck(300);
+
+ arcRight(130, 13.6);
+
+ go(130, 25);
+
+ wait(250, msec);
+
+ go(180, 0);
+
+ go(180, -24, 45);
+
+ flick();
 
  take();
 
- arcLeft(-40, 30, 20);
+ wait(1.75, sec);
 
  lick();
 
- wait(150, msec);
+ go(180, -0.5);
 
- go(-135, -16, 50);
+ arcLeft(95, 10);
 
- wait(100, msec);
+ go(180, -27, 30);
 
- take(45);
-
- proBono();
-
- wait(750, msec);
-
- proBono();
-
- go(-133, 49);
-
- take();
-
- arcLeft(-180, 17, 15);
-
- // go(-180, 1, 20);
-
- // wait(100, msec);
-
- // go(-180, 0.5, 10);
-
- leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
- rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
-
- wait(600, msec);
-
- go(-178, -30);
-
- wait(100, msec);
- 
- flick();
-
- wait(900, msec);
-
- take();
-
- go(-180, 10, 40 );
-
- untake();
-
- go(-130, -18, 35);
-
- wait(50, msec);
-
- go(-180, -22, 35);
+ leftDrive.setStopping(hold);
+ rightDrive.setStopping(hold);
 
 
 
@@ -1235,6 +1317,8 @@ void usercontrol(void) {
 
  
  int main() {
+ thread moveLick(midMoveLick, nullptr);
+ thread antiJam(antiJamThread, nullptr);
  Competition.autonomous(autonomous);
  Competition.drivercontrol(usercontrol);
  pre_auton();
