@@ -30,7 +30,7 @@ motor_group rightDrive = motor_group(frontRight, midRight, backRight);
 
 motor_group intake = motor_group(intake_1, intake_2);
 
-int auton = 3;
+int auton = 1;
 
 #define cs Controller1.Screen
 #define Button Controller1.Button 
@@ -95,7 +95,7 @@ void pre_auton(void) {
  cs.print("SOLOAWP(13)");
  break;
  case 2 :
-//  cs.print("COUNTERAWP(10-13)");
+ cs.print("COUNTERAWP(10-13)");
  break;
  case 3 :
  cs.print("LEFT3-4(7)");
@@ -820,7 +820,7 @@ void autonomous(void) {
 
  lick();
 
- go(180, -0.5);
+//  go(180, -0.5);
 
  arcLeft(95, 10);
 
@@ -849,6 +849,55 @@ void autonomous(void) {
 
  suck(300);
 
+ arcLeft(-130, 13.6);
+
+ go(-130, 25);
+
+ wait(250, msec);
+
+ go(-180, 0);
+
+ wait(100, msec);
+
+ leftDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
+ rightDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);\
+
+ wait(850, msec);
+
+ go(-182, -32, 60);
+
+ flick();
+
+ take();
+
+ wait(1.75, sec);
+
+ lick();
+
+//  go(180, -0.5);
+
+ arcLeft(-275, 10);
+
+ go(-180, -23, 30);
+
+ leftDrive.setStopping(hold);
+ rightDrive.setStopping(hold);
+
+
+ break;
+ case 4 :
+
+
+ take();
+
+ proBono();
+
+ flick();
+
+ go(0, 8, 60);
+
+ suck(300);
+
  arcRight(130, 13.6);
 
  go(130, 25);
@@ -863,11 +912,9 @@ void autonomous(void) {
 
  take();
 
- wait(1.75, sec);
+ wait(1, sec);
 
  lick();
-
- go(180, -0.5);
 
  arcLeft(95, 10);
 
@@ -876,82 +923,45 @@ void autonomous(void) {
  leftDrive.setStopping(hold);
  rightDrive.setStopping(hold);
 
-
-
- break;
- case 4 :
-
-
- proBono();
-
- proBono();
-
- flick();
-
- go(0, 24);
-
- take();
-
- arcRight(45, 31, 20);
-
- wait(150, msec);
-
- go(-45, 14.5, 50);
-
- wait(100, msec);
-
- outake();
-
- wait(800, msec);
-
- // take();
-
- go(-47, -52);
-
- take();
-
- wait(250, msec);
-
- go(180, 0);
-
- lick();
-
- wait(200, msec);
-
- // go(-180, 1, 20);
-
- // wait(100, msec);
-
- // go(-180, 0.5, 10);
-
- leftDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
- rightDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
-
- wait(800, msec);
-
- go(180, -30, 40);
-
- wait(100, msec);
- 
- flick();
-
- wait(900, msec);
-
- take();
-
- go(180, 10.5, 40 );
-
- untake();
-
- go(220, -19, 35);
-
- wait(50, msec);
-
- go(180, -22, 35);
  
  break;
  case 5 :
  
+  take();
+
+ proBono();
+
+ flick();
+
+ go(0, 8, 60);
+
+ suck(300);
+
+ arcLeft(-130, 13.6);
+
+ go(-130, 25);
+
+ wait(250, msec);
+
+ go(-180, 0);
+
+ go(-180, -24, 45);
+
+ flick();
+
+ take();
+
+ wait(1, sec);
+
+ lick();
+
+ arcLeft(-275, 10);
+
+ go(-180, -27, 30);
+
+ leftDrive.setStopping(hold);
+ rightDrive.setStopping(hold);
+
  
  break;
 
