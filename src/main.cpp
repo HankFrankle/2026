@@ -30,7 +30,7 @@ motor_group rightDrive = motor_group(frontRight, midRight, backRight);
 
 motor_group intake = motor_group(intake_1, intake_2);
 
-int auton = 1;
+int auton = 6;
 
 #define cs Controller1.Screen
 #define Button Controller1.Button 
@@ -266,7 +266,7 @@ void FullMid(void) {
  #define wheelRatio ((float)(NGw / NGm) * (360 / circ))
  #define gyro (int)(round(Gyro1.rotation(degrees)))
  #define posn ((rightDrive.position(degrees) + leftDrive.position(degrees)) / 2) 
- #define driveGain ((float)0.3)
+ #define driveGain ((float)0.27)
  #define turnGain ((float)0.4)
  #define angleError (-(dir - gyro))
 
@@ -336,6 +336,41 @@ void arcRight(float dir, float turnRad, float clamp = 50, float speed = 100) {
 }
 
 
+void arcBackRight(float dir, float turnRad, float clamp = 50, float speed = 100) {
+ float error = dir - gyro;
+ float base = (speed / 100) * error * turnGain;
+
+ leftDrive.spin(forward);
+ rightDrive.spin(forward);
+
+ while (abs(error) > 1) {
+
+ error = dir - gyro;
+ base = error * turnGain;
+
+
+ base = -mid(base, clamp, (turnRad / 5) *15);
+
+ float rightPower = base * ((turnRad + (driveWidth/2)) / turnRad);
+ float leftPower = base * ((turnRad - (driveWidth/2)) / turnRad);
+
+
+ leftDrive.setVelocity(leftPower, percent);
+ rightDrive.setVelocity(rightPower, percent);
+
+ }
+
+ leftDrive.setStopping(brake);
+ rightDrive.setStopping(brake);
+
+ 
+ leftDrive.setVelocity(0, percent);
+ rightDrive.setVelocity(0, percent);
+
+
+}
+
+
 void arcLeft(float dir, float turnRad, int clamp = 50, float speed = 100) {
  float error = dir - gyro;
  float base = (speed / 100 ) * error * turnGain;
@@ -368,6 +403,41 @@ void arcLeft(float dir, float turnRad, int clamp = 50, float speed = 100) {
 
 
 }
+
+
+void arcBackLeft(float dir, float turnRad, int clamp = 50, float speed = 100) {
+ float error = dir - gyro;
+ float base = (speed / 100 ) * error * turnGain;
+
+ leftDrive.spin(forward);
+ rightDrive.spin(forward);
+
+ while (abs(error) > 1) {
+
+ error = dir - gyro;
+ base = error * turnGain;
+
+ base = -mid(base, clamp, (turnRad / 5) * 15);
+
+ float leftPower = base * ((turnRad + (driveWidth/2)) / turnRad);
+ float rightPower = base * ((turnRad - (driveWidth/2)) / turnRad);
+
+
+ leftDrive.setVelocity(leftPower, percent);
+ rightDrive.setVelocity(rightPower, percent);
+
+ }
+
+ leftDrive.setStopping(brake);
+ rightDrive.setStopping(brake);
+
+ 
+ leftDrive.setVelocity(0, percent);
+ rightDrive.setVelocity(0, percent);
+
+
+}
+
 
 
 
@@ -657,14 +727,42 @@ int midMoveLick(void*) {
     return 0;
 }
 
-void suck(int time) {
+void swallow(int time) {
     midMoveLickWaitTime = time;
     midMoveLickEnable = true;
     Brain.Screen.clearScreen();
     Brain.Screen.setCursor(2, 1);
-    Brain.Screen.print("suck called");   // does this appear?
+    Brain.Screen.print("swallow called");   // does this appear?
 }
 
+
+bool midMoveUnLickEnable = false;
+int midMoveUnLickWaitTime = 0;
+
+
+int midMoveUnLick(void*) {
+    while (true) {
+        if (midMoveUnLickEnable) {
+            Brain.Screen.clearScreen();
+            Brain.Screen.setCursor(1, 1);
+            Brain.Screen.print("thread fired");   // does this appear?
+            wait(midMoveUnLickWaitTime, msec);
+            tongueState = 0;
+            tongue.set(0);
+            midMoveUnLickEnable = false;
+        }
+        task::sleep(20);
+    }
+    return 0;
+}
+
+void spit(int time) {
+    midMoveUnLickWaitTime = time;
+    midMoveUnLickEnable = true;
+    Brain.Screen.clearScreen();
+    Brain.Screen.setCursor(2, 1);
+    Brain.Screen.print("swallow called");   // does this appear?
+}
 
 
 
@@ -793,7 +891,7 @@ void autonomous(void) {
 
  go(0, 8, 60);
 
- suck(300);
+ swallow(300);
 
  arcRight(130, 13.6);
 
@@ -847,7 +945,7 @@ void autonomous(void) {
 
  go(0, 8, 60);
 
- suck(300);
+ swallow(300);
 
  arcLeft(-130, 13.6);
 
@@ -860,7 +958,7 @@ void autonomous(void) {
  wait(100, msec);
 
  leftDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
- rightDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);\
+ rightDrive.spin(vex::directionType::fwd, 4, vex::voltageUnits::volt);
 
  wait(850, msec);
 
@@ -896,7 +994,7 @@ void autonomous(void) {
 
  go(0, 8, 60);
 
- suck(300);
+ swallow(300);
 
  arcRight(130, 13.6);
 
@@ -935,7 +1033,7 @@ void autonomous(void) {
 
  go(0, 8, 60);
 
- suck(300);
+ swallow(300);
 
  arcLeft(-130, 13.6);
 
@@ -967,7 +1065,80 @@ void autonomous(void) {
 
  case 6 :
 
+ proBono();
 
+ flick();
+
+ take();
+
+ go(0, -32, 60);
+
+ wait(250, msec);
+
+ swallow(280);
+
+ go(-90, 6, 20);
+
+ leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ 
+ wait(350, msec);
+
+ go(-91, -33, 40);
+
+ wait(100, msec);
+
+ flick();
+ 
+ wait(1050, msec);
+
+ lick();
+
+ arcBackRight(5, 2.5);
+
+ spit(400);
+
+ flick();
+
+ swallow(1350);
+
+ go(2, 65, 60);
+
+ wait(350, msec);
+
+ go(-49, -13.5, 45);
+
+ wait(100, msec);
+
+ proBono();
+ intake_2.setVelocity(65, percent);
+
+ wait(500, msec);
+ 
+ proBono();
+
+ go(-49, 48, 60);
+
+ arcLeft(-76, 20);
+
+ leftDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ rightDrive.spin(vex::directionType::fwd, 3, vex::voltageUnits::volt);
+ 
+ wait(650, msec);
+
+ go(-91, -33, 50);
+
+ wait(100, msec);
+
+ flick();
+ 
+ break;
+ case 7 :
+
+
+ break;
+
+ case 8:
 
  
  proBono();
@@ -1174,29 +1345,7 @@ void autonomous(void) {
 
 
 
-
-
  break;
- case 7 :
-
-
-
-
- break;
-
- case 8:
- // take();
- // go(0, 15, 60);
- // go(-45, 30, 60);
- // go(-125, 40, 60);
- // go(-125, 2, 50);
- // go(-125, -4, 50);
- // go(-125, 4, 50);
-
-
- go(0, -10);
-
-
  }
 }
 
@@ -1239,6 +1388,13 @@ void scoreMid (void) {
  liftState = 0;
 }
 
+void scoreLow (void) {
+    intake_1.setVelocity(-50, percent);
+    intake_2.setVelocity(-100, percent);
+    intake.spin(forward);
+    intakeL.set(1);
+}
+
 void outtake(void) {
  intake_1.spin(forward);
  intake_2.spin(forward);
@@ -1249,6 +1405,7 @@ void outtake(void) {
 void intakeStop(void) {
  intake.setStopping(coast);
  intake.setVelocity(0, percent);
+ intakeL.set(0);
 }
 
 void afterHighScore(void) {
@@ -1296,8 +1453,9 @@ void usercontrol(void) {
  int intake1 = 0;
  int intake2 = 0;
  int intake3 = 0;
+ lift.set(1);
+ dih.set(1);
 
- proBono();
 
  
 
@@ -1329,6 +1487,7 @@ void usercontrol(void) {
  int main() {
  thread moveLick(midMoveLick, nullptr);
  thread antiJam(antiJamThread, nullptr);
+ thread moveUnLick(midMoveUnLick, nullptr);
  Competition.autonomous(autonomous);
  Competition.drivercontrol(usercontrol);
  pre_auton();
@@ -1348,7 +1507,8 @@ void usercontrol(void) {
  Controller1.ButtonUp.pressed(outtake);
  Controller1.ButtonUp.released(intakeStop);
  Controller1.ButtonDown.pressed(toggleTongue);
- Controller1.ButtonLeft.pressed(FullMid);
+ Controller1.ButtonLeft.pressed(scoreLow);
+ Controller1.ButtonLeft.released(intakeStop);
 
  while (true) {
  wait(20, msec);
